@@ -1,0 +1,149 @@
+@import './variables.css';
+
+.video-card {
+  background-color: var(--bg-secondary);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid var(--border);
+}
+
+.video-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px var(--shadow);
+}
+
+.video-thumbnail {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  background-color: var(--bg-tertiary);
+  overflow: hidden;
+}
+
+.video-thumbnail img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.play-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(37, 99, 235, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: white;
+}
+
+.play-overlay:hover {
+  background-color: var(--primary);
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.video-card-content {
+  padding: 1rem;
+}
+
+.video-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.video-card-content h3 {
+  font-size: 1rem;
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+
+.video-drag-handle {
+  cursor: grab;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  padding: 0.25rem;
+  transition: color 0.2s;
+  flex-shrink: 0;
+}
+
+.video-drag-handle:active {
+  cursor: grabbing;
+}
+
+.video-drag-handle:hover {
+  color: var(--text);
+}
+
+.video-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.video-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.video-actions .btn-icon {
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.video-actions .btn-icon:hover {
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .video-card-content {
+    padding: 0.875rem;
+  }
+
+  .video-card-header {
+    margin-bottom: 0.625rem;
+  }
+
+  .video-card-content h3 {
+    font-size: 0.9375rem;
+  }
+
+  .video-drag-handle {
+    padding: 0.125rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .video-card-content {
+    padding: 0.75rem;
+  }
+
+  .video-card-content h3 {
+    font-size: 0.875rem;
+  }
+
+  .video-card-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}

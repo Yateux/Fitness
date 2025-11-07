@@ -1,0 +1,25 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Règles pour les utilisateurs
+    match /users/{userId} {
+      // Permettre à tout le monde de lire et écrire pour le moment
+      // En production, vous devriez ajouter l'authentification
+      allow read, write: if true;
+
+      // Règles pour les sous-collections de l'utilisateur
+      match /categories/{categoryId} {
+        allow read, write: if true;
+      }
+
+      match /videos/{videoId} {
+        allow read, write: if true;
+      }
+
+      match /data/{document=**} {
+        allow read, write: if true;
+      }
+    }
+  }
+}
