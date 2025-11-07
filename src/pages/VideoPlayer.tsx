@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import YouTube from 'react-youtube';
+import YouTube, { YouTubeEvent } from 'react-youtube';
 import { X, Clock } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { formatTime } from '../utils/time';
@@ -8,31 +8,29 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import '../styles/VideoPlayer.css';
 
 const VideoPlayer = () => {
-  const { videoId } = useParams();
+  const { videoId } = useParams<{ videoId: string }>();
   const navigate = useNavigate();
   const { getVideoById, watchTime, addWatchTime, setWatchTime, isLoading } = useApp();
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [sessionTime, setSessionTime] = useState(0);
-  const [player, setPlayer] = useState(null);
-  const [videoLoading, setVideoLoading] = useState(true);
-  const sessionTimeRef = useRef(0);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [sessionTime, setSessionTime] = useState<number>(0);
+  const [player, setPlayer] = useState<any>(null);
+  const [videoLoading, setVideoLoading] = useState<boolean>(true);
+  const sessionTimeRef = useRef<number>(0);
 
   const video = getVideoById(videoId);
 
   if (isLoading) {
     return (
       <div className="video-player-page">
-        <LoadingSpinner size="large" text="Chargement de la vidéo..." />
+        <LoadingSpinner size="large" text="Loading video..." />
       </div>
     );
   }
 
-  // Garder la ref à jour
   useEffect(() => {
     sessionTimeRef.current = sessionTime;
   }, [sessionTime]);
 
-  // Timer simple : juste un compteur qui s'incrémente chaque seconde
   useEffect(() => {
     if (!isPlaying) {
       return;
@@ -45,25 +43,23 @@ const VideoPlayer = () => {
     return () => clearInterval(interval);
   }, [isPlaying]);
 
-  // Sauvegarder le temps uniquement au démontage du composant (quand on quitte la page)
   useEffect(() => {
     return () => {
-      if (sessionTimeRef.current > 0) {
+      if (sessionTimeRef.current > 0 && videoId) {
         addWatchTime(videoId, sessionTimeRef.current);
       }
     };
   }, [videoId, addWatchTime]);
 
-  const handleReady = (event) => {
+  const handleReady = (event: YouTubeEvent) => {
     setPlayer(event.target);
     setVideoLoading(false);
   };
 
-  const handleStateChange = (event) => {
+  const handleStateChange = (event: YouTubeEvent) => {
     const playerState = event.data;
     console.log('YouTube state:', playerState);
 
-    // 1 = playing, 2 = paused
     setIsPlaying(playerState === 1);
   };
 
@@ -78,19 +74,19 @@ const VideoPlayer = () => {
   };
 
   const handleClose = () => {
-    if (sessionTimeRef.current > 0) {
+    if (sessionTimeRef.current > 0 && videoId) {
       addWatchTime(videoId, sessionTimeRef.current);
     }
     navigate(-1);
   };
 
   const handleResetTime = () => {
-    if (window.confirm('Voulez-vous vraiment réinitialiser le temps pour cette vidéo ?')) {
+    if (window.confirm('Do you really want to reset the time for this video?') && video) {
       setSessionTime(0);
-      setWatchTime(prev => ({
-        ...prev,
+      setWatchTime({
+        ...watchTime,
         [video.id]: 0
-      }));
+      });
     }
   };
 
@@ -98,9 +94,9 @@ const VideoPlayer = () => {
     return (
       <div className="video-player-page">
         <div className="error-message">
-          <h2>Vidéo introuvable</h2>
+          <h2>Video not found</h2>
           <button className="btn btn-primary" onClick={() => navigate('/')}>
-            Retour à l'accueil
+            Back to home
           </button>
         </div>
       </div>
@@ -114,14 +110,14 @@ const VideoPlayer = () => {
           <h2>{video.title}</h2>
           <button className="btn btn-secondary" onClick={handleClose}>
             <X size={18} />
-            Fermer
+            Close
           </button>
         </div>
 
         <div className="video-wrapper">
           {videoLoading && (
             <div className="video-loading-overlay">
-              <LoadingSpinner size="medium" text="Chargement du lecteur YouTube..." />
+              <LoadingSpinner size="medium" text="Loading YouTube player..." />
             </div>
           )}
           <YouTube
@@ -143,20 +139,20 @@ const VideoPlayer = () => {
             className={`btn ${isPlaying ? 'btn-secondary' : 'btn-primary'}`}
             onClick={handleStartStop}
           >
-            {isPlaying ? 'Pause' : 'Démarrer'}
+            {isPlaying ? 'Pause' : 'Start'}
           </button>
         </div>
 
         <div className="video-info">
           <span className="time-spent">
             <Clock size={18} />
-            Temps passé sur cette vidéo: {formatTime((watchTime[video.id] || 0) + sessionTime)}
-            {isPlaying && ' (en lecture)'}
-            {!isPlaying && sessionTime > 0 && ' (en pause)'}
+            Time spent on this video: {formatTime((watchTime[video.id] || 0) + sessionTime)}
+            {isPlaying && ' (playing)'}
+            {!isPlaying && sessionTime > 0 && ' (paused)'}
           </span>
           {(watchTime[video.id] > 0 || sessionTime > 0) && (
             <button className="btn btn-secondary" onClick={handleResetTime}>
-              Réinitialiser le temps
+              Reset time
             </button>
           )}
         </div>

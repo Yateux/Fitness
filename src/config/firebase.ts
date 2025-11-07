@@ -1,5 +1,5 @@
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { initializeApp, FirebaseApp } from "firebase/app";
+import { getFirestore, Firestore } from "firebase/firestore";
 
 // Configuration Firebase
 // Les variables d'environnement doivent être définies dans le fichier .env
@@ -15,9 +15,9 @@ const firebaseConfig = {
 };
 
 // Initialiser Firebase
-const app = initializeApp(firebaseConfig);
+const app: FirebaseApp = initializeApp(firebaseConfig);
 
 // Initialiser Firestore
-export const db = getFirestore(app);
+export const db: Firestore = getFirestore(app);
 
 export default app;

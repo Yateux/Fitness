@@ -1,9 +1,4 @@
-/**
- * Formate le temps en secondes en format lisible
- * @param {number} seconds - Le temps en secondes
- * @returns {string} - Le temps formaté (ex: "5m 30s")
- */
-export const formatTime = (seconds) => {
+export const formatTime = (seconds: number): string => {
   if (!seconds || seconds === 0) return '0m 0s';
 
   const mins = Math.floor(seconds / 60);
@@ -11,19 +6,14 @@ export const formatTime = (seconds) => {
   return `${mins}m ${secs}s`;
 };
 
-/**
- * Formate le temps en format long (heures incluses si nécessaire)
- * @param {number} seconds - Le temps en secondes
- * @returns {string} - Le temps formaté (ex: "1h 30m")
- */
-export const formatTimeLong = (seconds) => {
+export const formatTimeLong = (seconds: number): string => {
   if (!seconds || seconds === 0) return '0 minutes';
 
   const hours = Math.floor(seconds / 3600);
   const mins = Math.floor((seconds % 3600) / 60);
   const secs = seconds % 60;
 
-  const parts = [];
+  const parts: string[] = [];
   if (hours > 0) parts.push(`${hours}h`);
   if (mins > 0) parts.push(`${mins}m`);
   if (secs > 0 && hours === 0) parts.push(`${secs}s`);

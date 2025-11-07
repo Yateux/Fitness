@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, MouseEvent } from 'react';
 import { Folder, Clock, Trash2, Edit2, GripVertical } from 'lucide-react';
 import {
   DndContext,
@@ -7,6 +7,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  DragEndEvent,
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -18,12 +19,30 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { useApp } from '../context/AppContext';
 import { formatTime } from '../utils/time';
+import { Category, Video } from '../types';
 import EditCategoryModal from './EditCategoryModal';
 import LoadingSpinner from './LoadingSpinner';
 import '../styles/Sidebar.css';
 
-// Composant pour un élément de catégorie draggable
-const SortableCategoryItem = ({ category, selectedCategoryId, onSelectCategory, onEdit, onDelete, getCategoryVideos, getCategoryTotalTime }) => {
+interface SortableCategoryItemProps {
+  category: Category;
+  selectedCategoryId: string | null;
+  onSelectCategory: (categoryId: string) => void;
+  onEdit: (e: MouseEvent<HTMLButtonElement>, category: Category) => void;
+  onDelete: (e: MouseEvent<HTMLButtonElement>, categoryId: string) => void;
+  getCategoryVideos: (categoryId: string) => Video[];
+  getCategoryTotalTime: (categoryId: string) => number;
+}
+
+const SortableCategoryItem = ({
+  category,
+  selectedCategoryId,
+  onSelectCategory,
+  onEdit,
+  onDelete,
+  getCategoryVideos,
+  getCategoryTotalTime
+}: SortableCategoryItemProps) => {
   const {
     attributes,
     listeners,
@@ -61,7 +80,7 @@ const SortableCategoryItem = ({ category, selectedCategoryId, onSelectCategory, 
           <span>{category.name}</span>
         </div>
         <div className="category-meta">
-          <span className="video-count">{videoCount} vidéos</span>
+          <span className="video-count">{videoCount} videos</span>
           <span className="time-badge">
             <Clock size={14} />
             {formatTime(totalTime)}
@@ -72,14 +91,14 @@ const SortableCategoryItem = ({ category, selectedCategoryId, onSelectCategory, 
         <button
           className="btn-icon"
           onClick={(e) => onEdit(e, category)}
-          title="Modifier"
+          title="Edit"
         >
           <Edit2 size={16} />
         </button>
         <button
           className="btn-icon btn-danger"
           onClick={(e) => onDelete(e, category.id)}
-          title="Supprimer"
+          title="Delete"
         >
           <Trash2 size={16} />
         </button>
@@ -88,9 +107,14 @@ const SortableCategoryItem = ({ category, selectedCategoryId, onSelectCategory, 
   );
 };
 
-const Sidebar = ({ selectedCategoryId, onSelectCategory }) => {
+interface SidebarProps {
+  selectedCategoryId: string | null;
+  onSelectCategory: (categoryId: string | null) => void;
+}
+
+const Sidebar = ({ selectedCategoryId, onSelectCategory }: SidebarProps) => {
   const { categories, getCategoryVideos, getCategoryTotalTime, deleteCategory, reorderCategories, isLoading } = useApp();
-  const [editingCategory, setEditingCategory] = useState(null);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -99,9 +123,9 @@ const Sidebar = ({ selectedCategoryId, onSelectCategory }) => {
     })
   );
 
-  const handleDelete = (e, categoryId) => {
+  const handleDelete = (e: MouseEvent<HTMLButtonElement>, categoryId: string) => {
     e.stopPropagation();
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer cette catégorie et toutes ses vidéos ?')) {
+    if (window.confirm('Are you sure you want to delete this category and all its videos?')) {
       deleteCategory(categoryId);
       if (selectedCategoryId === categoryId) {
         onSelectCategory(null);
@@ -109,15 +133,15 @@ const Sidebar = ({ selectedCategoryId, onSelectCategory }) => {
     }
   };
 
-  const handleEdit = (e, category) => {
+  const handleEdit = (e: MouseEvent<HTMLButtonElement>, category: Category) => {
     e.stopPropagation();
     setEditingCategory(category);
   };
 
-  const handleDragEnd = (event) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    if (active.id !== over.id) {
+    if (over && active.id !== over.id) {
       const oldIndex = categories.findIndex((cat) => cat.id === active.id);
       const newIndex = categories.findIndex((cat) => cat.id === over.id);
       const newOrder = arrayMove(categories, oldIndex, newIndex);
@@ -127,11 +151,11 @@ const Sidebar = ({ selectedCategoryId, onSelectCategory }) => {
 
   return (
     <aside className="sidebar">
-      <h2>Catégories</h2>
+      <h2>Categories</h2>
       {isLoading ? (
-        <LoadingSpinner size="medium" text="Chargement des catégories..." />
+        <LoadingSpinner size="medium" text="Loading categories..." />
       ) : categories.length === 0 ? (
-        <p className="empty-state">Aucune catégorie. Créez-en une !</p>
+        <p className="empty-state">No categories. Create one!</p>
       ) : (
         <DndContext
           sensors={sensors}

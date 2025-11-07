@@ -1,6 +1,11 @@
 import '../styles/LoadingSpinner.css';
 
-const LoadingSpinner = ({ size = 'medium', text = '' }) => {
+interface LoadingSpinnerProps {
+  size?: 'small' | 'medium' | 'large';
+  text?: string;
+}
+
+const LoadingSpinner = ({ size = 'medium', text = '' }: LoadingSpinnerProps) => {
   return (
     <div className={`loading-spinner loading-spinner-${size}`}>
       <div className="spinner"></div>

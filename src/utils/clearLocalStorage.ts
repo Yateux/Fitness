@@ -2,7 +2,7 @@
  * Nettoie toutes les données du localStorage
  * À utiliser une seule fois pour migrer vers Firebase
  */
-export const clearAllLocalStorage = () => {
+export const clearAllLocalStorage = (): boolean => {
   try {
     // Sauvegarder les clés avant de les supprimer (pour debug)
     const keys = Object.keys(localStorage);

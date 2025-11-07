@@ -11,17 +11,16 @@ import VideoPlayer from './pages/VideoPlayer';
 import './styles/App.css';
 
 const AppLayout = () => {
-  const [showAddCategory, setShowAddCategory] = useState(false);
-  const [showAddVideo, setShowAddVideo] = useState(false);
+  const [showAddCategory, setShowAddCategory] = useState<boolean>(false);
+  const [showAddVideo, setShowAddVideo] = useState<boolean>(false);
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Extraire l'ID de catégorie de l'URL si on est sur une page de catégorie
-  const currentCategoryId = location.pathname.startsWith('/category/')
+  const currentCategoryId: string | null = location.pathname.startsWith('/category/')
     ? location.pathname.split('/category/')[1]
     : null;
 
-  const handleSelectCategory = (categoryId) => {
+  const handleSelectCategory = (categoryId: string | null) => {
     if (categoryId) {
       navigate(`/category/${categoryId}`);
     } else {

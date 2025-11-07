@@ -1,10 +1,15 @@
-import { useState } from 'react';
+import { useState, KeyboardEvent } from 'react';
 import { useApp } from '../context/AppContext';
 import Modal from './Modal';
 
-const AddCategoryModal = ({ isOpen, onClose }) => {
-  const [name, setName] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+interface AddCategoryModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const AddCategoryModal = ({ isOpen, onClose }: AddCategoryModalProps) => {
+  const [name, setName] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const { addCategory } = useApp();
 
   const handleSubmit = async () => {
@@ -20,17 +25,17 @@ const AddCategoryModal = ({ isOpen, onClose }) => {
     }
   };
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleSubmit();
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Nouvelle catégorie">
+    <Modal isOpen={isOpen} onClose={onClose} title="New Category">
       <input
         type="text"
-        placeholder="Nom de la catégorie"
+        placeholder="Category name"
         value={name}
         onChange={e => setName(e.target.value)}
         onKeyDown={handleKeyDown}
@@ -38,10 +43,10 @@ const AddCategoryModal = ({ isOpen, onClose }) => {
       />
       <div className="modal-actions">
         <button className="btn btn-secondary" onClick={onClose} disabled={isSubmitting}>
-          Annuler
+          Cancel
         </button>
         <button className="btn btn-primary" onClick={handleSubmit} disabled={isSubmitting}>
-          {isSubmitting ? 'Création...' : 'Créer'}
+          {isSubmitting ? 'Creating...' : 'Create'}
         </button>
       </div>
     </Modal>

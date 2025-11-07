@@ -1,17 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { extractYouTubeId } from '../utils/youtube';
+import { Video } from '../types';
 import YouTubePreview from './YouTubePreview';
 import '../styles/Modal.css';
 
-const EditVideoModal = ({ video, onClose }) => {
+interface EditVideoModalProps {
+  video: Video | null;
+  onClose: () => void;
+}
+
+const EditVideoModal = ({ video, onClose }: EditVideoModalProps) => {
   const { updateVideo } = useApp();
-  const [title, setTitle] = useState(video?.title || '');
-  const [url, setUrl] = useState(video?.url || '');
-  const [error, setError] = useState('');
-  const [currentVideoId, setCurrentVideoId] = useState(video?.videoId || '');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [title, setTitle] = useState<string>(video?.title || '');
+  const [url, setUrl] = useState<string>(video?.url || '');
+  const [error, setError] = useState<string>('');
+  const [currentVideoId, setCurrentVideoId] = useState<string>(video?.videoId || '');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   useEffect(() => {
     if (video) {
@@ -21,31 +28,32 @@ const EditVideoModal = ({ video, onClose }) => {
     }
   }, [video]);
 
-  // Update preview in real-time as user types URL
   useEffect(() => {
     const videoId = extractYouTubeId(url);
     setCurrentVideoId(videoId || '');
   }, [url]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
 
     if (!title.trim()) {
-      setError('Le titre est requis');
+      setError('Title is required');
       return;
     }
 
     if (!url.trim()) {
-      setError('L\'URL YouTube est requise');
+      setError('YouTube URL is required');
       return;
     }
 
     const videoId = extractYouTubeId(url);
     if (!videoId) {
-      setError('URL YouTube invalide. Utilisez une URL comme: https://www.youtube.com/watch?v=...');
+      setError('Invalid YouTube URL. Use a URL like: https://www.youtube.com/watch?v=...');
       return;
     }
+
+    if (!video) return;
 
     setIsSubmitting(true);
     try {
@@ -56,7 +64,8 @@ const EditVideoModal = ({ video, onClose }) => {
       });
       onClose();
     } catch (err) {
-      setError(err.message || 'Une erreur est survenue');
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -64,11 +73,11 @@ const EditVideoModal = ({ video, onClose }) => {
 
   if (!video) return null;
 
-  return (
+  return createPortal(
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Modifier la vidéo</h2>
+          <h2>Edit Video</h2>
           <button className="btn-icon" onClick={onClose}>
             <X size={24} />
           </button>
@@ -78,28 +87,28 @@ const EditVideoModal = ({ video, onClose }) => {
           <YouTubePreview videoId={currentVideoId} title={title} />
 
           <div className="form-group">
-            <label htmlFor="video-title">Titre de la vidéo</label>
+            <label htmlFor="video-title">Video title</label>
             <input
               id="video-title"
               type="text"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Ex: Entraînement des bras"
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
+              placeholder="Ex: Arm Workout"
               autoFocus
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="video-url">URL YouTube</label>
+            <label htmlFor="video-url">YouTube URL</label>
             <input
               id="video-url"
               type="url"
               value={url}
-              onChange={(e) => setUrl(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setUrl(e.target.value)}
               placeholder="https://www.youtube.com/watch?v=..."
             />
             <small className="form-hint">
-              Collez l'URL complète de la vidéo YouTube
+              Paste the full YouTube video URL
             </small>
           </div>
 
@@ -107,15 +116,16 @@ const EditVideoModal = ({ video, onClose }) => {
 
           <div className="modal-actions">
             <button type="button" className="btn btn-secondary" onClick={onClose} disabled={isSubmitting}>
-              Annuler
+              Cancel
             </button>
             <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-              {isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
+              {isSubmitting ? 'Saving...' : 'Save'}
             </button>
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

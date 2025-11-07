@@ -5,22 +5,23 @@ import {
   getDoc,
   getDocs,
   deleteDoc,
-  updateDoc,
-  onSnapshot
+  onSnapshot,
+  CollectionReference,
+  DocumentReference,
+  QuerySnapshot,
+  DocumentData,
+  Unsubscribe
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
+import { Category, Video, WatchTime } from '../types';
 
-// Collection de référence pour un utilisateur (vous pouvez ajouter l'auth plus tard)
-const USER_ID = 'default-user'; // Pour l'instant, un seul utilisateur
+const USER_ID = 'default-user';
 
-// Références aux collections
-const categoriesRef = collection(db, 'users', USER_ID, 'categories');
-const videosRef = collection(db, 'users', USER_ID, 'videos');
-const watchTimeRef = doc(db, 'users', USER_ID, 'data', 'watchTime');
+const categoriesRef: CollectionReference = collection(db, 'users', USER_ID, 'categories');
+const videosRef: CollectionReference = collection(db, 'users', USER_ID, 'videos');
+const watchTimeRef: DocumentReference = doc(db, 'users', USER_ID, 'data', 'watchTime');
 
-// ============ CATEGORIES ============
-
-export const saveCategories = async (categories) => {
+export const saveCategories = async (categories: Category[]): Promise<void> => {
   try {
     const batch = categories.map(category =>
       setDoc(doc(categoriesRef, category.id), category)
@@ -33,12 +34,12 @@ export const saveCategories = async (categories) => {
   }
 };
 
-export const loadCategories = async () => {
+export const loadCategories = async (): Promise<Category[]> => {
   try {
-    const snapshot = await getDocs(categoriesRef);
-    const categories = [];
+    const snapshot: QuerySnapshot<DocumentData> = await getDocs(categoriesRef);
+    const categories: Category[] = [];
     snapshot.forEach(doc => {
-      categories.push(doc.data());
+      categories.push(doc.data() as Category);
     });
     return categories;
   } catch (error) {
@@ -47,19 +48,17 @@ export const loadCategories = async () => {
   }
 };
 
-export const subscribeToCategories = (callback) => {
-  return onSnapshot(categoriesRef, (snapshot) => {
-    const categories = [];
+export const subscribeToCategories = (callback: (categories: Category[]) => void): Unsubscribe => {
+  return onSnapshot(categoriesRef, (snapshot: QuerySnapshot<DocumentData>) => {
+    const categories: Category[] = [];
     snapshot.forEach(doc => {
-      categories.push(doc.data());
+      categories.push(doc.data() as Category);
     });
     callback(categories);
   });
 };
 
-// ============ VIDEOS ============
-
-export const saveVideos = async (videos) => {
+export const saveVideos = async (videos: Video[]): Promise<void> => {
   try {
     const batch = videos.map(video =>
       setDoc(doc(videosRef, video.id), video)
@@ -72,12 +71,12 @@ export const saveVideos = async (videos) => {
   }
 };
 
-export const loadVideos = async () => {
+export const loadVideos = async (): Promise<Video[]> => {
   try {
-    const snapshot = await getDocs(videosRef);
-    const videos = [];
+    const snapshot: QuerySnapshot<DocumentData> = await getDocs(videosRef);
+    const videos: Video[] = [];
     snapshot.forEach(doc => {
-      videos.push(doc.data());
+      videos.push(doc.data() as Video);
     });
     return videos;
   } catch (error) {
@@ -86,17 +85,17 @@ export const loadVideos = async () => {
   }
 };
 
-export const subscribeToVideos = (callback) => {
-  return onSnapshot(videosRef, (snapshot) => {
-    const videos = [];
+export const subscribeToVideos = (callback: (videos: Video[]) => void): Unsubscribe => {
+  return onSnapshot(videosRef, (snapshot: QuerySnapshot<DocumentData>) => {
+    const videos: Video[] = [];
     snapshot.forEach(doc => {
-      videos.push(doc.data());
+      videos.push(doc.data() as Video);
     });
     callback(videos);
   });
 };
 
-export const deleteVideoFromFirebase = async (videoId) => {
+export const deleteVideoFromFirebase = async (videoId: string): Promise<void> => {
   try {
     await deleteDoc(doc(videosRef, videoId));
     console.log('Video deleted from Firebase');
@@ -106,9 +105,7 @@ export const deleteVideoFromFirebase = async (videoId) => {
   }
 };
 
-// ============ WATCH TIME ============
-
-export const saveWatchTime = async (watchTime) => {
+export const saveWatchTime = async (watchTime: WatchTime): Promise<void> => {
   try {
     await setDoc(watchTimeRef, { data: watchTime });
     console.log('Watch time saved to Firebase');
@@ -118,11 +115,11 @@ export const saveWatchTime = async (watchTime) => {
   }
 };
 
-export const loadWatchTime = async () => {
+export const loadWatchTime = async (): Promise<WatchTime> => {
   try {
     const docSnap = await getDoc(watchTimeRef);
     if (docSnap.exists()) {
-      return docSnap.data().data || {};
+      return (docSnap.data().data as WatchTime) || {};
     }
     return {};
   } catch (error) {
@@ -131,19 +128,17 @@ export const loadWatchTime = async () => {
   }
 };
 
-export const subscribeToWatchTime = (callback) => {
+export const subscribeToWatchTime = (callback: (watchTime: WatchTime) => void): Unsubscribe => {
   return onSnapshot(watchTimeRef, (doc) => {
     if (doc.exists()) {
-      callback(doc.data().data || {});
+      callback((doc.data().data as WatchTime) || {});
     } else {
       callback({});
     }
   });
 };
 
-// ============ CATEGORY OPERATIONS ============
-
-export const deleteCategoryFromFirebase = async (categoryId) => {
+export const deleteCategoryFromFirebase = async (categoryId: string): Promise<void> => {
   try {
     await deleteDoc(doc(categoriesRef, categoryId));
     console.log('Category deleted from Firebase');

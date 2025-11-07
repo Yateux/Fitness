@@ -1,13 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { Category } from '../types';
 import '../styles/Modal.css';
 
-const EditCategoryModal = ({ category, onClose }) => {
+interface EditCategoryModalProps {
+  category: Category | null;
+  onClose: () => void;
+}
+
+const EditCategoryModal = ({ category, onClose }: EditCategoryModalProps) => {
   const { updateCategory } = useApp();
-  const [name, setName] = useState(category?.name || '');
-  const [error, setError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [name, setName] = useState<string>(category?.name || '');
+  const [error, setError] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   useEffect(() => {
     if (category) {
@@ -15,21 +22,24 @@ const EditCategoryModal = ({ category, onClose }) => {
     }
   }, [category]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
 
     if (!name.trim()) {
-      setError('Le nom de la catégorie est requis');
+      setError('Category name is required');
       return;
     }
+
+    if (!category) return;
 
     setIsSubmitting(true);
     try {
       await updateCategory(category.id, name);
       onClose();
     } catch (err) {
-      setError(err.message || 'Une erreur est survenue');
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -37,11 +47,11 @@ const EditCategoryModal = ({ category, onClose }) => {
 
   if (!category) return null;
 
-  return (
+  return createPortal(
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Modifier la catégorie</h2>
+          <h2>Edit Category</h2>
           <button className="btn-icon" onClick={onClose}>
             <X size={24} />
           </button>
@@ -49,13 +59,13 @@ const EditCategoryModal = ({ category, onClose }) => {
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="category-name">Nom de la catégorie</label>
+            <label htmlFor="category-name">Category name</label>
             <input
               id="category-name"
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Ex: Musculation, Cardio, Yoga..."
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+              placeholder="Ex: Strength Training, Cardio, Yoga..."
               autoFocus
             />
             {error && <p className="error-message">{error}</p>}
@@ -63,15 +73,16 @@ const EditCategoryModal = ({ category, onClose }) => {
 
           <div className="modal-actions">
             <button type="button" className="btn btn-secondary" onClick={onClose} disabled={isSubmitting}>
-              Annuler
+              Cancel
             </button>
             <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-              {isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
+              {isSubmitting ? 'Saving...' : 'Save'}
             </button>
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

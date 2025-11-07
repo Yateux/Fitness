@@ -1,16 +1,22 @@
-import { useState } from 'react';
+import { useState, MouseEvent } from 'react';
 import { Play, Clock, Trash2, Edit2, GripVertical } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useApp } from '../context/AppContext';
 import { formatTime } from '../utils/time';
 import { getYouTubeThumbnail } from '../utils/youtube';
+import { Video } from '../types';
 import EditVideoModal from './EditVideoModal';
 import '../styles/VideoCard.css';
 
-const VideoCard = ({ video, onPlay }) => {
+interface VideoCardProps {
+  video: Video;
+  onPlay: (video: Video) => void;
+}
+
+const VideoCard = ({ video, onPlay }: VideoCardProps) => {
   const { watchTime, deleteVideo } = useApp();
-  const [isEditingVideo, setIsEditingVideo] = useState(false);
+  const [isEditingVideo, setIsEditingVideo] = useState<boolean>(false);
 
   const {
     attributes,
@@ -27,14 +33,14 @@ const VideoCard = ({ video, onPlay }) => {
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const handleDelete = (e) => {
+  const handleDelete = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer cette vidéo ?')) {
+    if (window.confirm('Are you sure you want to delete this video?')) {
       deleteVideo(video.id);
     }
   };
 
-  const handleEdit = (e) => {
+  const handleEdit = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     setIsEditingVideo(true);
   };
@@ -69,14 +75,14 @@ const VideoCard = ({ video, onPlay }) => {
             <button
               className="btn-icon"
               onClick={handleEdit}
-              title="Modifier"
+              title="Edit"
             >
               <Edit2 size={16} />
             </button>
             <button
               className="btn-icon btn-danger"
               onClick={handleDelete}
-              title="Supprimer"
+              title="Delete"
             >
               <Trash2 size={16} />
             </button>

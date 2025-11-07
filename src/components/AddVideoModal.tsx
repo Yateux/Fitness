@@ -1,24 +1,49 @@
 import { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { extractYouTubeId } from '../utils/youtube';
+import { extractYouTubeId, fetchYouTubeTitle } from '../utils/youtube';
 import Modal from './Modal';
 import YouTubePreview from './YouTubePreview';
 
-const AddVideoModal = ({ isOpen, onClose }) => {
-  const [formData, setFormData] = useState({
+interface AddVideoModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  preselectedCategoryId?: string;
+}
+
+interface FormData {
+  title: string;
+  url: string;
+  categoryId: string;
+}
+
+const AddVideoModal = ({ isOpen, onClose, preselectedCategoryId = '' }: AddVideoModalProps) => {
+  const [formData, setFormData] = useState<FormData>({
     title: '',
     url: '',
-    categoryId: ''
+    categoryId: preselectedCategoryId
   });
-  const [currentVideoId, setCurrentVideoId] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentVideoId, setCurrentVideoId] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const { categories, addVideo } = useApp();
 
-  // Update preview in real-time as user types URL
+  useEffect(() => {
+    if (preselectedCategoryId) {
+      setFormData(prev => ({ ...prev, categoryId: preselectedCategoryId }));
+    }
+  }, [preselectedCategoryId]);
+
   useEffect(() => {
     const videoId = extractYouTubeId(formData.url);
     setCurrentVideoId(videoId || '');
-  }, [formData.url]);
+
+    if (videoId && !formData.title.trim()) {
+      fetchYouTubeTitle(videoId).then(title => {
+        if (title) {
+          setFormData(prev => ({ ...prev, title }));
+        }
+      });
+    }
+  }, [formData.url, formData.title]);
 
   const handleSubmit = async () => {
     if (formData.title.trim() && formData.url.trim() && formData.categoryId) {
@@ -28,30 +53,32 @@ const AddVideoModal = ({ isOpen, onClose }) => {
         setFormData({ title: '', url: '', categoryId: '' });
         onClose();
       } catch (error) {
-        alert(error.message);
+        if (error instanceof Error) {
+          alert(error.message);
+        }
       } finally {
         setIsSubmitting(false);
       }
     }
   };
 
-  const handleChange = (field, value) => {
+  const handleChange = (field: keyof FormData, value: string) => {
     setFormData({ ...formData, [field]: value });
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Ajouter une vidéo">
+    <Modal isOpen={isOpen} onClose={onClose} title="Add Video">
       <YouTubePreview videoId={currentVideoId} title={formData.title} />
 
       <input
         type="text"
-        placeholder="Titre de la vidéo"
+        placeholder="Video title"
         value={formData.title}
         onChange={e => handleChange('title', e.target.value)}
       />
       <input
         type="text"
-        placeholder="URL YouTube"
+        placeholder="YouTube URL"
         value={formData.url}
         onChange={e => handleChange('url', e.target.value)}
       />
@@ -59,17 +86,17 @@ const AddVideoModal = ({ isOpen, onClose }) => {
         value={formData.categoryId}
         onChange={e => handleChange('categoryId', e.target.value)}
       >
-        <option value="">Sélectionner une catégorie</option>
+        <option value="">Select a category</option>
         {categories.map(cat => (
           <option key={cat.id} value={cat.id}>{cat.name}</option>
         ))}
       </select>
       <div className="modal-actions">
         <button className="btn btn-secondary" onClick={onClose} disabled={isSubmitting}>
-          Annuler
+          Cancel
         </button>
         <button className="btn btn-primary" onClick={handleSubmit} disabled={isSubmitting}>
-          {isSubmitting ? 'Ajout en cours...' : 'Ajouter'}
+          {isSubmitting ? 'Adding...' : 'Add'}
         </button>
       </div>
     </Modal>

@@ -25,6 +25,43 @@
   gap: 1.5rem;
 }
 
+.add-video-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 2px dashed rgba(99, 102, 241, 0.4);
+  border-radius: var(--radius-xl);
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  cursor: pointer;
+  transition: all var(--transition-slow);
+  color: var(--text-muted);
+}
+
+.add-video-card:hover {
+  background: rgba(99, 102, 241, 0.05);
+  border-color: rgba(99, 102, 241, 0.6);
+  color: var(--primary-light);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.15);
+}
+
+.add-video-card svg {
+  transition: transform var(--transition);
+}
+
+.add-video-card:hover svg {
+  transform: scale(1.1);
+}
+
+.add-video-card span {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
 @media (max-width: 1200px) {
   .video-grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));

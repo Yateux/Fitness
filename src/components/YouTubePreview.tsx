@@ -1,11 +1,16 @@
 import { getYouTubeThumbnail } from '../utils/youtube';
 import '../styles/YouTubePreview.css';
 
-const YouTubePreview = ({ videoId, title }) => {
+interface YouTubePreviewProps {
+  videoId: string;
+  title: string;
+}
+
+const YouTubePreview = ({ videoId, title }: YouTubePreviewProps) => {
   if (!videoId) {
     return (
       <div className="youtube-preview youtube-preview-empty">
-        <p>Entrez une URL YouTube valide pour voir la preview</p>
+        <p>Enter a valid YouTube URL to see the preview</p>
       </div>
     );
   }
@@ -15,7 +20,7 @@ const YouTubePreview = ({ videoId, title }) => {
       <div className="youtube-preview-thumbnail">
         <img
           src={getYouTubeThumbnail(videoId)}
-          alt={title || 'Prévisualisation YouTube'}
+          alt={title || 'YouTube Preview'}
         />
         <div className="youtube-preview-play">
           <svg width="68" height="48" viewBox="0 0 68 48" fill="none">

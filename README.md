@@ -1,193 +1,218 @@
-# Fitness Tracker
+# Fitness Video Tracker
 
-Application web de suivi de fitness développée avec React et Vite. Organisez vos vidéos d'entraînement YouTube par catégories et suivez votre temps d'entraînement.
+A modern web application for organizing and tracking your YouTube workout videos. Built with React and Firebase, featuring real-time synchronization, drag-and-drop organization, and automatic progress tracking.
 
-## Fonctionnalités
+## Features
 
-- **Gestion de catégories** : Créez et organisez vos propres catégories d'exercices
-- **Drag & Drop** : Réorganisez vos catégories et vidéos par glisser-déposer
-- **Ajout de vidéos YouTube** : Ajoutez facilement des vidéos depuis YouTube avec aperçu en temps réel
-- **Édition** : Modifiez vos catégories et vidéos à tout moment
-- **Lecteur vidéo intégré** : Regardez vos vidéos directement sur le site
-- **Suivi du temps** : Le temps passé sur chaque vidéo est automatiquement enregistré
-- **Firebase Firestore** : Synchronisation en temps réel de vos données dans le cloud
-- **États de chargement** : Spinners de chargement pour une meilleure expérience utilisateur
-- **Design responsive** : Interface optimisée pour mobile, tablette et desktop
-- **Interface sobre** : Design minimaliste et moderne en mode sombre
+- **Category Management** - Organize videos into custom workout categories
+- **Drag & Drop** - Intuitive reordering of categories and videos
+- **YouTube Integration** - Add videos with live preview and automatic title fetching
+- **Video Player** - Built-in YouTube player with playback tracking
+- **Progress Tracking** - Automatic time tracking for each video
+- **Real-time Sync** - Firebase Firestore integration for instant data synchronization
+- **Responsive Design** - Optimized for mobile, tablet, and desktop
+- **Modern UI** - Professional dark theme with smooth animations
 
-## Installation
+## Quick Start
 
-### Prérequis
-- Node.js 18+ et npm
-- Un projet Firebase (gratuit) - [Créer un projet](https://console.firebase.google.com/)
+### Prerequisites
 
-### Étapes d'installation
+- Node.js 18 or higher
+- Firebase account (free tier available)
+- YouTube Data API key (optional, for auto-fetching titles)
 
-1. **Cloner le projet**
+### Installation
+
+1. **Clone the repository**
 ```bash
-git clone <url-du-repo>
+git clone <repository-url>
 cd fitness-tracker
 ```
 
-2. **Installer les dépendances**
+2. **Install dependencies**
 ```bash
 npm install
 ```
 
-3. **Configurer Firebase**
-   - Copiez `.env.example` vers `.env`
-   - Allez sur [Firebase Console](https://console.firebase.google.com/)
-   - Créez un nouveau projet ou sélectionnez un projet existant
-   - Dans Project Settings > General > Your apps, créez une application Web
-   - Copiez les valeurs de configuration dans votre fichier `.env`
-   - Voir [FIREBASE_SETUP.md](./FIREBASE_SETUP.md) pour plus de détails
+3. **Configure Firebase**
 
-4. **Configurer Firestore**
-   - Dans Firebase Console, allez dans Firestore Database
-   - Créez une base de données en mode "production"
-   - Allez dans l'onglet "Rules"
-   - Copiez-collez le contenu de `firestore.rules`
+Copy the example environment file:
+```bash
+cp .env.example .env
+```
 
-5. **Lancer en développement**
+Add your Firebase configuration to `.env`:
+```env
+VITE_FIREBASE_API_KEY=your_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_STORAGE_BUCKET=your-project.firebasestorage.app
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
+```
+
+Optional - Add YouTube API key for automatic title fetching:
+```env
+VITE_YOUTUBE_API_KEY=your_youtube_api_key
+```
+
+4. **Set up Firestore**
+   - Go to [Firebase Console](https://console.firebase.google.com/)
+   - Create a new Firestore database in production mode
+   - Update security rules from `firestore.rules`
+
+5. **Start development server**
 ```bash
 npm run dev
 ```
 
-6. **Build pour production**
+6. **Build for production**
 ```bash
 npm run build
 ```
 
-## Déploiement sur Vercel
+## Usage
 
-Consultez le guide détaillé : [DEPLOYMENT.md](./DEPLOYMENT.md)
+1. **Create Categories** - Click "New Category" to organize your workouts
+2. **Add Videos** - Use "Add Video" or click the dashed card in a category
+3. **Organize** - Drag and drop to reorder categories and videos
+4. **Track Progress** - Watch time is automatically recorded
+5. **Edit Anytime** - Update titles, URLs, and categories as needed
 
-**Résumé rapide :**
-1. Poussez votre code sur GitHub/GitLab/Bitbucket
-2. Importez le projet sur [Vercel](https://vercel.com)
-3. Configurez les variables d'environnement Firebase
-4. Déployez automatiquement
+## Tech Stack
 
-## Utilisation
+- **React 19** - Modern UI framework
+- **Vite 7** - Lightning-fast build tool
+- **Firebase Firestore** - Real-time NoSQL database
+- **React Router 7** - Client-side routing
+- **@dnd-kit** - Drag and drop functionality
+- **react-youtube** - YouTube player integration
+- **lucide-react** - Icon library
+- **CSS Variables** - Themeable design system
 
-1. **Créer une catégorie** : Cliquez sur "Nouvelle catégorie" et donnez-lui un nom (ex: Biceps, Cardio, etc.)
-2. **Ajouter une vidéo** : Cliquez sur "Ajouter une vidéo", collez l'URL YouTube, donnez un titre et sélectionnez une catégorie
-3. **Regarder une vidéo** : Sélectionnez une catégorie dans la barre latérale, puis cliquez sur le bouton play d'une vidéo
-4. **Suivre votre progression** : Le temps passé est automatiquement enregistré pour chaque vidéo et catégorie
-
-## Technologies utilisées
-
-- **React 19** - Framework UI
-- **Vite 7** - Build tool ultra-rapide
-- **Firebase Firestore** - Base de données NoSQL en temps réel
-- **React Router 7** - Navigation SPA
-- **@dnd-kit** - Bibliothèque drag & drop
-- **react-youtube** - Lecteur YouTube intégré
-- **lucide-react** - Icônes modernes
-- **CSS Variables** - Système de thème personnalisable
-
-## Structure du projet
+## Project Structure
 
 ```
 fitness-tracker/
 ├── src/
-│   ├── components/          # Composants réutilisables
-│   │   ├── Header.jsx       # En-tête avec boutons d'action
-│   │   ├── Sidebar.jsx      # Barre latérale avec drag & drop
-│   │   ├── VideoCard.jsx    # Carte de vidéo avec drag & drop
-│   │   ├── Modal.jsx        # Modal générique
-│   │   ├── LoadingSpinner.jsx # Composant de chargement
-│   │   ├── YouTubePreview.jsx # Aperçu vidéo YouTube
-│   │   ├── AddCategoryModal.jsx
-│   │   ├── EditCategoryModal.jsx
-│   │   ├── AddVideoModal.jsx
-│   │   └── EditVideoModal.jsx
-│   ├── pages/               # Pages de l'application
-│   │   ├── Home.jsx         # Page d'accueil
-│   │   ├── CategoryPage.jsx # Liste des vidéos (avec DnD)
-│   │   └── VideoPlayer.jsx  # Lecteur vidéo
-│   ├── context/             # État global
-│   │   └── AppContext.jsx   # Context API + Firebase
-│   ├── services/            # Services externes
-│   │   └── firebaseService.js # CRUD Firebase Firestore
-│   ├── config/              # Configuration
-│   │   └── firebase.js      # Configuration Firebase
-│   ├── utils/               # Fonctions utilitaires
-│   │   ├── clearLocalStorage.js # Nettoyage localStorage
-│   │   ├── youtube.js       # Extraction ID YouTube
-│   │   └── time.js          # Formatage du temps
-│   ├── styles/              # Fichiers CSS par composant
-│   │   ├── variables.css    # Variables CSS + thème
-│   │   ├── App.css          # Styles globaux + responsive
-│   │   ├── LoadingSpinner.css
-│   │   ├── YouTubePreview.css
-│   │   └── ... (un CSS par composant)
-│   ├── App.jsx              # Composant racine avec routing
-│   ├── main.jsx             # Point d'entrée
-│   └── index.css            # Reset CSS
-├── .env                     # Variables d'environnement (ignoré par git)
-├── .env.example             # Template des variables d'environnement
-├── .gitignore               # Fichiers à ignorer par git
-├── vercel.json              # Configuration Vercel
-├── firestore.rules          # Règles de sécurité Firestore
-├── DEPLOYMENT.md            # Guide de déploiement Vercel
-├── FIREBASE_SETUP.md        # Guide de configuration Firebase
-└── package.json
+│   ├── components/          # Reusable UI components
+│   │   ├── Header.jsx
+│   │   ├── Sidebar.jsx
+│   │   ├── VideoCard.jsx
+│   │   ├── Modal.jsx
+│   │   ├── LoadingSpinner.jsx
+│   │   ├── YouTubePreview.jsx
+│   │   └── ...Modal components
+│   ├── pages/              # Application pages
+│   │   ├── Home.jsx
+│   │   ├── CategoryPage.jsx
+│   │   └── VideoPlayer.jsx
+│   ├── context/            # Global state management
+│   │   └── AppContext.jsx
+│   ├── services/           # External services
+│   │   └── firebaseService.js
+│   ├── config/             # Configuration
+│   │   └── firebase.js
+│   ├── utils/              # Helper functions
+│   │   ├── youtube.js
+│   │   └── time.js
+│   └── styles/             # CSS modules
+├── .env.example            # Environment template
+├── firestore.rules         # Firestore security rules
+└── vercel.json            # Deployment configuration
 ```
 
 ## Architecture
 
-L'application suit une architecture modulaire avec :
+The application follows a modern React architecture:
 
-- **Components** : Composants UI réutilisables et isolés avec drag & drop
-- **Pages** : Pages complètes avec routing React Router 7
-- **Context** : Gestion d'état global avec React Context API
-- **Services** : Couche de services pour Firebase (CRUD, subscriptions temps réel)
-- **Config** : Configuration Firebase et environnement
-- **Utils** : Fonctions utilitaires pures (formatage, extraction, nettoyage)
-- **Styles** : CSS modulaire par composant avec design responsive
+- **Components** - Modular, reusable UI elements with drag-and-drop
+- **Pages** - Route-based views using React Router
+- **Context API** - Global state management
+- **Firebase Service** - Abstracted database operations
+- **Real-time Updates** - Firestore subscriptions for live data
 
-### Flux de données
+### Data Flow
 
 ```
 Firebase Firestore (Cloud)
-    ↓ (Real-time subscriptions)
+    ↓ Real-time subscriptions
 firebaseService.js
-    ↓
+    ↓ CRUD operations
 AppContext.jsx (Global State)
-    ↓
+    ↓ Props & hooks
 Components & Pages
-    ↓ (User actions)
+    ↓ User interactions
 firebaseService.js
-    ↓
+    ↓ Write operations
 Firebase Firestore (Cloud)
 ```
 
-## Sécurité
+## Deployment
 
-⚠️ **Important** : Les règles Firestore actuelles permettent un accès complet pour faciliter le développement. Pour la production, vous devriez :
+### Vercel (Recommended)
 
-1. Implémenter Firebase Authentication
-2. Mettre à jour les règles Firestore pour restreindre l'accès aux utilisateurs authentifiés
-3. Ajouter une validation des données côté serveur
+1. Push your code to GitHub/GitLab/Bitbucket
+2. Import project on [Vercel](https://vercel.com)
+3. Add environment variables from `.env`
+4. Deploy automatically
 
-Voir [DEPLOYMENT.md](./DEPLOYMENT.md) pour plus de détails sur la sécurisation.
+### Other Platforms
 
-## Contribuer
+The app is a standard Vite React application and can be deployed to:
+- Netlify
+- Firebase Hosting
+- AWS Amplify
+- Cloudflare Pages
 
-Les contributions sont les bienvenues ! N'hésitez pas à :
-1. Fork le projet
-2. Créer une branche pour votre fonctionnalité (`git checkout -b feature/AmazingFeature`)
-3. Commit vos changements (`git commit -m 'Add some AmazingFeature'`)
-4. Push vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrir une Pull Request
+## Security Considerations
 
-## Licence
+The default Firestore rules allow open access for development. For production:
 
-MIT
+1. Implement Firebase Authentication
+2. Update Firestore rules to restrict access
+3. Add server-side validation
+4. Secure API keys
+
+Example production rules:
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+MIT License - feel free to use this project for personal or commercial purposes.
 
 ## Support
 
-Pour toute question ou problème :
-- Ouvrez une issue sur GitHub
-- Consultez la documentation [DEPLOYMENT.md](./DEPLOYMENT.md) et [FIREBASE_SETUP.md](./FIREBASE_SETUP.md)
+For issues, questions, or suggestions:
+- Open an issue on GitHub
+- Check existing documentation
+- Review Firebase and Vite documentation
+
+## Roadmap
+
+Potential future enhancements:
+- User authentication and profiles
+- Workout plans and schedules
+- Exercise statistics and analytics
+- Social sharing features
+- Offline support with PWA
+- Multi-language support

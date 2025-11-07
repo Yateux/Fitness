@@ -4,8 +4,8 @@ const Home = () => {
   return (
     <div className="home-page">
       <div className="welcome">
-        <h2>Bienvenue sur Fitness Tracker</h2>
-        <p>Sélectionnez une catégorie dans la barre latérale pour voir vos vidéos d'entraînement</p>
+        <h2>Welcome to Fitness Tracker</h2>
+        <p>Select a category from the sidebar to view your workout videos</p>
       </div>
     </div>
   );

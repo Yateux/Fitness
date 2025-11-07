@@ -1,18 +1,23 @@
 import { FolderPlus, Plus } from 'lucide-react';
 import '../styles/Header.css';
 
-const Header = ({ onAddCategory, onAddVideo }) => {
+interface HeaderProps {
+  onAddCategory: () => void;
+  onAddVideo: () => void;
+}
+
+const Header = ({ onAddCategory, onAddVideo }: HeaderProps) => {
   return (
     <header className="header">
       <h1>Fitness Tracker</h1>
       <div className="header-actions">
         <button className="btn btn-primary" onClick={onAddCategory}>
           <FolderPlus size={18} />
-          Nouvelle catégorie
+          New Category
         </button>
         <button className="btn btn-primary" onClick={onAddVideo}>
           <Plus size={18} />
-          Ajouter une vidéo
+          Add Video
         </button>
       </div>
     </header>
