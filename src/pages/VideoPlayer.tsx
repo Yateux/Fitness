@@ -19,14 +19,6 @@ const VideoPlayer = () => {
 
   const video = getVideoById(videoId);
 
-  if (isLoading) {
-    return (
-      <div className="video-player-page">
-        <LoadingSpinner size="large" text="Loading video..." />
-      </div>
-    );
-  }
-
   useEffect(() => {
     sessionTimeRef.current = sessionTime;
   }, [sessionTime]);
@@ -50,6 +42,14 @@ const VideoPlayer = () => {
       }
     };
   }, [videoId, addWatchTime]);
+
+  if (isLoading) {
+    return (
+      <div className="video-player-page">
+        <LoadingSpinner size="large" text="Loading video..." />
+      </div>
+    );
+  }
 
   const handleReady = (event: YouTubeEvent) => {
     setPlayer(event.target);

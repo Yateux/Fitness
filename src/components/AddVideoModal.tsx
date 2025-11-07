@@ -14,13 +14,15 @@ interface FormData {
   title: string;
   url: string;
   categoryId: string;
+  notes: string;
 }
 
 const AddVideoModal = ({ isOpen, onClose, preselectedCategoryId = '' }: AddVideoModalProps) => {
   const [formData, setFormData] = useState<FormData>({
     title: '',
     url: '',
-    categoryId: preselectedCategoryId
+    categoryId: preselectedCategoryId,
+    notes: ''
   });
   const [currentVideoId, setCurrentVideoId] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -49,8 +51,8 @@ const AddVideoModal = ({ isOpen, onClose, preselectedCategoryId = '' }: AddVideo
     if (formData.title.trim() && formData.url.trim() && formData.categoryId) {
       setIsSubmitting(true);
       try {
-        await addVideo(formData.title, formData.url, formData.categoryId);
-        setFormData({ title: '', url: '', categoryId: '' });
+        await addVideo(formData.title, formData.url, formData.categoryId, formData.notes);
+        setFormData({ title: '', url: '', categoryId: '', notes: '' });
         onClose();
       } catch (error) {
         if (error instanceof Error) {
@@ -91,6 +93,12 @@ const AddVideoModal = ({ isOpen, onClose, preselectedCategoryId = '' }: AddVideo
           <option key={cat.id} value={cat.id}>{cat.name}</option>
         ))}
       </select>
+      <textarea
+        placeholder="Notes (Optional): Ex: 3 sets x 12 reps, 20kg dumbbell..."
+        value={formData.notes}
+        onChange={e => handleChange('notes', e.target.value)}
+        rows={3}
+      />
       <div className="modal-actions">
         <button className="btn btn-secondary" onClick={onClose} disabled={isSubmitting}>
           Cancel

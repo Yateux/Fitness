@@ -16,6 +16,7 @@ const EditVideoModal = ({ video, onClose }: EditVideoModalProps) => {
   const { updateVideo } = useApp();
   const [title, setTitle] = useState<string>(video?.title || '');
   const [url, setUrl] = useState<string>(video?.url || '');
+  const [notes, setNotes] = useState<string>(video?.notes || '');
   const [error, setError] = useState<string>('');
   const [currentVideoId, setCurrentVideoId] = useState<string>(video?.videoId || '');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -24,6 +25,7 @@ const EditVideoModal = ({ video, onClose }: EditVideoModalProps) => {
     if (video) {
       setTitle(video.title);
       setUrl(video.url);
+      setNotes(video.notes || '');
       setCurrentVideoId(video.videoId);
     }
   }, [video]);
@@ -60,7 +62,8 @@ const EditVideoModal = ({ video, onClose }: EditVideoModalProps) => {
       await updateVideo(video.id, {
         title: title.trim(),
         url: url.trim(),
-        videoId
+        videoId,
+        notes: notes.trim()
       });
       onClose();
     } catch (err) {
@@ -109,6 +112,20 @@ const EditVideoModal = ({ video, onClose }: EditVideoModalProps) => {
             />
             <small className="form-hint">
               Paste the full YouTube video URL
+            </small>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="video-notes">Notes (Optional)</label>
+            <textarea
+              id="video-notes"
+              value={notes}
+              onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setNotes(e.target.value)}
+              placeholder="Ex: 3 sets x 12 reps, 20kg dumbbell..."
+              rows={4}
+            />
+            <small className="form-hint">
+              Track sets, reps, weights, or any other notes
             </small>
           </div>
 

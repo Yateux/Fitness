@@ -110,7 +110,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 0.625rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.625rem;
 }
 
 .video-card-content h3 {
@@ -124,6 +124,19 @@
   flex: 1;
   font-weight: 600;
   color: var(--text-secondary);
+}
+
+.video-notes {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  background: rgba(99, 102, 241, 0.08);
+  padding: 0.625rem 0.75rem;
+  border-radius: var(--radius);
+  margin-bottom: 0.875rem;
+  line-height: 1.6;
+  border-left: 3px solid var(--primary-light);
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .video-drag-handle {

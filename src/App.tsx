@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import Header from './components/Header';
@@ -13,8 +13,19 @@ import './styles/App.css';
 const AppLayout = () => {
   const [showAddCategory, setShowAddCategory] = useState<boolean>(false);
   const [showAddVideo, setShowAddVideo] = useState<boolean>(false);
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+  const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth <= 768);
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const currentCategoryId: string | null = location.pathname.startsWith('/category/')
     ? location.pathname.split('/category/')[1]
@@ -33,12 +44,15 @@ const AppLayout = () => {
       <Header
         onAddCategory={() => setShowAddCategory(true)}
         onAddVideo={() => setShowAddVideo(true)}
+        onToggleSidebar={isMobile ? () => setSidebarOpen(!sidebarOpen) : undefined}
       />
 
       <div className="container">
         <Sidebar
           selectedCategoryId={currentCategoryId}
           onSelectCategory={handleSelectCategory}
+          isOpen={isMobile ? sidebarOpen : true}
+          onClose={isMobile ? () => setSidebarOpen(false) : undefined}
         />
 
         <main className="main-content">

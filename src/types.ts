@@ -13,6 +13,7 @@ export interface Video {
   categoryId: string;
   order: number;
   createdAt: string;
+  notes?: string;
 }
 
 export interface WatchTime {
@@ -33,7 +34,7 @@ export interface AppContextType {
   reorderCategories: (newOrder: Category[]) => Promise<void>;
 
   // Video actions
-  addVideo: (title: string, url: string, categoryId: string) => Promise<Video>;
+  addVideo: (title: string, url: string, categoryId: string, notes?: string) => Promise<Video>;
   deleteVideo: (videoId: string) => Promise<void>;
   updateVideo: (videoId: string, updates: Partial<Video>) => Promise<void>;
   reorderVideos: (categoryId: string, newOrder: Video[]) => Promise<void>;

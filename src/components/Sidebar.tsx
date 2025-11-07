@@ -1,5 +1,5 @@
-import { useState, MouseEvent } from 'react';
-import { Folder, Clock, Trash2, Edit2, GripVertical } from 'lucide-react';
+import { useState, MouseEvent, useEffect } from 'react';
+import { Folder, Clock, Trash2, Edit2, GripVertical, X } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -110,9 +110,11 @@ const SortableCategoryItem = ({
 interface SidebarProps {
   selectedCategoryId: string | null;
   onSelectCategory: (categoryId: string | null) => void;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-const Sidebar = ({ selectedCategoryId, onSelectCategory }: SidebarProps) => {
+const Sidebar = ({ selectedCategoryId, onSelectCategory, isOpen = true, onClose }: SidebarProps) => {
   const { categories, getCategoryVideos, getCategoryTotalTime, deleteCategory, reorderCategories, isLoading } = useApp();
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
 
@@ -122,6 +124,17 @@ const Sidebar = ({ selectedCategoryId, onSelectCategory }: SidebarProps) => {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   const handleDelete = (e: MouseEvent<HTMLButtonElement>, categoryId: string) => {
     e.stopPropagation();
@@ -149,9 +162,25 @@ const Sidebar = ({ selectedCategoryId, onSelectCategory }: SidebarProps) => {
     }
   };
 
+  const handleCategoryClick = (categoryId: string) => {
+    onSelectCategory(categoryId);
+    if (onClose) {
+      onClose();
+    }
+  };
+
   return (
-    <aside className="sidebar">
-      <h2>Categories</h2>
+    <>
+      {isOpen && onClose && <div className="sidebar-overlay" onClick={onClose} />}
+      <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
+        <div className="sidebar-header">
+          <h2>Categories</h2>
+          {onClose && (
+            <button className="btn-icon sidebar-close" onClick={onClose}>
+              <X size={24} />
+            </button>
+          )}
+        </div>
       {isLoading ? (
         <LoadingSpinner size="medium" text="Loading categories..." />
       ) : categories.length === 0 ? (
@@ -172,7 +201,7 @@ const Sidebar = ({ selectedCategoryId, onSelectCategory }: SidebarProps) => {
                   key={category.id}
                   category={category}
                   selectedCategoryId={selectedCategoryId}
-                  onSelectCategory={onSelectCategory}
+                  onSelectCategory={handleCategoryClick}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
                   getCategoryVideos={getCategoryVideos}
@@ -184,13 +213,14 @@ const Sidebar = ({ selectedCategoryId, onSelectCategory }: SidebarProps) => {
         </DndContext>
       )}
 
-      {editingCategory && (
-        <EditCategoryModal
-          category={editingCategory}
-          onClose={() => setEditingCategory(null)}
-        />
-      )}
-    </aside>
+        {editingCategory && (
+          <EditCategoryModal
+            category={editingCategory}
+            onClose={() => setEditingCategory(null)}
+          />
+        )}
+      </aside>
+    </>
   );
 };
 

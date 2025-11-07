@@ -66,6 +66,11 @@ const VideoCard = ({ video, onPlay }: VideoCardProps) => {
             <GripVertical size={18} />
           </div>
         </div>
+        {video.notes && (
+          <div className="video-notes">
+            {video.notes}
+          </div>
+        )}
         <div className="video-card-footer">
           <span className="time-badge">
             <Clock size={14} />

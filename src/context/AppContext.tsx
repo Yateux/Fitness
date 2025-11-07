@@ -104,7 +104,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
         await saveCategories(updatedCategories);
     };
 
-    const addVideo = async (title: string, url: string, categoryId: string): Promise<Video> => {
+    const addVideo = async (title: string, url: string, categoryId: string, notes?: string): Promise<Video> => {
         const videoId = extractYouTubeId(url);
         if (!videoId) {
             throw new Error("Invalid YouTube URL");
@@ -119,6 +119,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
             categoryId,
             order: categoryVideos.length,
             createdAt: new Date().toISOString(),
+            ...(notes && { notes: notes.trim() })
         };
         const updatedVideos = [...videos, newVideo];
         setVideos(updatedVideos);
