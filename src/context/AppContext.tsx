@@ -4,13 +4,16 @@ import {
     subscribeToCategories,
     subscribeToVideos,
     subscribeToWatchTime,
+    subscribeToWorkoutSessions,
     saveCategories,
     saveVideos,
     saveWatchTime,
+    saveWorkoutSessions,
     deleteVideoFromFirebase,
     deleteCategoryFromFirebase,
+    deleteWorkoutSessionFromFirebase,
 } from "../services/firebaseService";
-import { Category, Video, WatchTime, AppContextType } from "../types";
+import { Category, Video, WatchTime, WorkoutSession, AppContextType } from "../types";
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
@@ -30,6 +33,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [videos, setVideos] = useState<Video[]>([]);
     const [watchTime, setWatchTime] = useState<WatchTime>({});
+    const [workoutSessions, setWorkoutSessions] = useState<WorkoutSession[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
@@ -58,10 +62,16 @@ export const AppProvider = ({ children }: AppProviderProps) => {
             setWatchTime(data);
         });
 
+        const unsubscribeWorkoutSessions = subscribeToWorkoutSessions((data) => {
+            const sorted = data.sort((a, b) => new Date(a.date + 'T' + a.time).getTime() - new Date(b.date + 'T' + b.time).getTime());
+            setWorkoutSessions(sorted);
+        });
+
         return () => {
             unsubscribeCategories();
             unsubscribeVideos();
             unsubscribeWatchTime();
+            unsubscribeWorkoutSessions();
         };
     }, []);
 
@@ -206,31 +216,57 @@ export const AppProvider = ({ children }: AppProviderProps) => {
         return categories.find((cat) => cat.id === categoryId);
     };
 
+    const addWorkoutSession = async (session: Omit<WorkoutSession, 'id' | 'createdAt'>): Promise<WorkoutSession> => {
+        const newSession: WorkoutSession = {
+            ...session,
+            id: Date.now().toString(),
+            createdAt: new Date().toISOString(),
+        };
+        const updatedSessions = [...workoutSessions, newSession];
+        setWorkoutSessions(updatedSessions);
+        await saveWorkoutSessions(updatedSessions);
+        return newSession;
+    };
+
+    const updateWorkoutSession = async (sessionId: string, updates: Partial<WorkoutSession>): Promise<void> => {
+        const updatedSessions = workoutSessions.map((session) =>
+            session.id === sessionId ? { ...session, ...updates } : session
+        );
+        setWorkoutSessions(updatedSessions);
+        await saveWorkoutSessions(updatedSessions);
+    };
+
+    const deleteWorkoutSession = async (sessionId: string): Promise<void> => {
+        const updatedSessions = workoutSessions.filter((session) => session.id !== sessionId);
+        setWorkoutSessions(updatedSessions);
+        await deleteWorkoutSessionFromFirebase(sessionId);
+    };
+
+    const getSessionsByDate = (date: string): WorkoutSession[] => {
+        return workoutSessions.filter((session) => session.date === date);
+    };
+
     const value: AppContextType = {
-        // State
         categories,
         videos,
         watchTime,
+        workoutSessions,
         isLoading,
-
-        // Category actions
         addCategory,
         deleteCategory,
         updateCategory,
         reorderCategories,
-
-        // Video actions
         addVideo,
         addNote,
         deleteVideo,
         updateVideo,
         reorderVideos,
-
-        // Watch time actions
         addWatchTime,
         setWatchTime: updateWatchTime,
-
-        // Utils
+        addWorkoutSession,
+        updateWorkoutSession,
+        deleteWorkoutSession,
+        getSessionsByDate,
         getCategoryVideos,
         getCategoryTotalTime,
         getVideoById,

@@ -13,13 +13,14 @@ import {
   Unsubscribe
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { Category, Video, WatchTime } from '../types';
+import { Category, Video, WatchTime, WorkoutSession } from '../types';
 
 const USER_ID = 'default-user';
 
 const categoriesRef: CollectionReference = collection(db, 'users', USER_ID, 'categories');
 const videosRef: CollectionReference = collection(db, 'users', USER_ID, 'videos');
 const watchTimeRef: DocumentReference = doc(db, 'users', USER_ID, 'data', 'watchTime');
+const workoutSessionsRef: CollectionReference = collection(db, 'users', USER_ID, 'workoutSessions');
 
 export const saveCategories = async (categories: Category[]): Promise<void> => {
   try {
@@ -144,6 +145,39 @@ export const deleteCategoryFromFirebase = async (categoryId: string): Promise<vo
     console.log('Category deleted from Firebase');
   } catch (error) {
     console.error('Error deleting category:', error);
+    throw error;
+  }
+};
+
+export const saveWorkoutSessions = async (sessions: WorkoutSession[]): Promise<void> => {
+  try {
+    const batch = sessions.map(session =>
+      setDoc(doc(workoutSessionsRef, session.id), session)
+    );
+    await Promise.all(batch);
+    console.log('Workout sessions saved to Firebase');
+  } catch (error) {
+    console.error('Error saving workout sessions:', error);
+    throw error;
+  }
+};
+
+export const subscribeToWorkoutSessions = (callback: (sessions: WorkoutSession[]) => void): Unsubscribe => {
+  return onSnapshot(workoutSessionsRef, (snapshot: QuerySnapshot<DocumentData>) => {
+    const sessions: WorkoutSession[] = [];
+    snapshot.forEach(doc => {
+      sessions.push(doc.data() as WorkoutSession);
+    });
+    callback(sessions);
+  });
+};
+
+export const deleteWorkoutSessionFromFirebase = async (sessionId: string): Promise<void> => {
+  try {
+    await deleteDoc(doc(workoutSessionsRef, sessionId));
+    console.log('Workout session deleted from Firebase');
+  } catch (error) {
+    console.error('Error deleting workout session:', error);
     throw error;
   }
 };

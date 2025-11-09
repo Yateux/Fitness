@@ -1,5 +1,6 @@
 import { useState, MouseEvent, useEffect } from 'react';
-import { Folder, Clock, Trash2, Edit2, GripVertical, X } from 'lucide-react';
+import { Folder, Clock, Trash2, Edit2, GripVertical, X, Calendar, Home } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   DndContext,
   closestCenter,
@@ -117,6 +118,8 @@ interface SidebarProps {
 const Sidebar = ({ selectedCategoryId, onSelectCategory, isOpen = true, onClose }: SidebarProps) => {
   const { categories, getCategoryVideos, getCategoryTotalTime, deleteCategory, reorderCategories, isLoading } = useApp();
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -169,18 +172,49 @@ const Sidebar = ({ selectedCategoryId, onSelectCategory, isOpen = true, onClose 
     }
   };
 
+  const handleNavClick = (path: string) => {
+    navigate(path);
+    if (onClose) {
+      onClose();
+    }
+  };
+
   return (
     <>
       {isOpen && onClose && <div className="sidebar-overlay" onClick={onClose} />}
       <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <h2>Categories</h2>
+          <h2>Menu</h2>
           {onClose && (
             <button className="btn-icon sidebar-close" onClick={onClose}>
               <X size={24} />
             </button>
           )}
         </div>
+
+        <div className="sidebar-nav">
+          <button
+            className={`nav-item ${location.pathname === '/' ? 'active' : ''}`}
+            onClick={() => handleNavClick('/')}
+          >
+            <Home size={20} />
+            <span>Home</span>
+          </button>
+          <button
+            className={`nav-item ${location.pathname === '/planning' ? 'active' : ''}`}
+            onClick={() => handleNavClick('/planning')}
+          >
+            <Calendar size={20} />
+            <span>Schedule</span>
+          </button>
+        </div>
+
+        <div className="sidebar-divider"></div>
+
+        <div className="sidebar-section-header">
+          <h3>Categories</h3>
+        </div>
+
       {isLoading ? (
         <LoadingSpinner size="medium" text="Loading categories..." />
       ) : categories.length === 0 ? (

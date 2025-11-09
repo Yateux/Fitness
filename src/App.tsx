@@ -9,6 +9,7 @@ import Home from './pages/Home';
 import CategoryPage from './pages/CategoryPage';
 import VideoPlayer from './pages/VideoPlayer';
 import NoteView from './pages/NoteView';
+import PlanningPage from './pages/PlanningPage';
 import './styles/App.css';
 
 const AppLayout = () => {
@@ -59,6 +60,7 @@ const AppLayout = () => {
         <main className="main-content">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/planning" element={<PlanningPage />} />
             <Route path="/category/:categoryId" element={<CategoryPage />} />
             <Route path="/video/:videoId" element={<VideoPlayer />} />
             <Route path="/note/:videoId" element={<NoteView />} />

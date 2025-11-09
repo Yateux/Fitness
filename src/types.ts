@@ -27,6 +27,7 @@ export interface AppContextType {
   categories: Category[];
   videos: Video[];
   watchTime: WatchTime;
+  workoutSessions: WorkoutSession[];
   isLoading: boolean;
 
   // Category actions
@@ -46,6 +47,12 @@ export interface AppContextType {
   addWatchTime: (videoId: string, seconds: number) => Promise<void>;
   setWatchTime: (newWatchTime: WatchTime) => Promise<void>;
 
+  // Planning actions
+  addWorkoutSession: (session: Omit<WorkoutSession, 'id' | 'createdAt'>) => Promise<WorkoutSession>;
+  updateWorkoutSession: (sessionId: string, updates: Partial<WorkoutSession>) => Promise<void>;
+  deleteWorkoutSession: (sessionId: string) => Promise<void>;
+  getSessionsByDate: (date: string) => WorkoutSession[];
+
   // Utils
   getCategoryVideos: (categoryId: string) => Video[];
   getCategoryTotalTime: (categoryId: string) => number;
@@ -63,4 +70,15 @@ export interface YouTubeVideoItem {
 
 export interface YouTubeApiResponse {
   items: YouTubeVideoItem[];
+}
+
+export interface WorkoutSession {
+  id: string;
+  date: string; // ISO date string
+  time: string; // HH:MM format
+  categoryIds: string[]; // Multiple categories for the session
+  videoIds?: string[]; // Optional specific videos
+  notes?: string;
+  completed?: boolean;
+  createdAt: string;
 }
