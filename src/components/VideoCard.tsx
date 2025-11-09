@@ -1,5 +1,5 @@
 import { useState, MouseEvent } from 'react';
-import { Play, Clock, Trash2, Edit2, GripVertical } from 'lucide-react';
+import { Play, Clock, Trash2, Edit2, GripVertical, FileText } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useApp } from '../context/AppContext';
@@ -46,17 +46,43 @@ const VideoCard = ({ video, onPlay }: VideoCardProps) => {
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="video-card">
+    <div ref={setNodeRef} style={style} className={`video-card ${video.isNoteOnly ? 'note-card' : ''}`}>
       <div className="video-thumbnail">
-        <img
-          src={getYouTubeThumbnail(video.videoId)}
-          alt={video.title}
-        />
+        {video.isNoteOnly ? (
+          <div className="note-thumbnail">
+            {video.imageUrl ? (
+              <img
+                src={video.imageUrl}
+                alt={video.title}
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  if (target.parentElement) {
+                    target.parentElement.innerHTML = '<div class="note-icon-fallback"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg></div>';
+                  }
+                }}
+              />
+            ) : (
+              <div className="note-icon-fallback">
+                <FileText size={48} />
+              </div>
+            )}
+            <div className="note-badge">
+              <FileText size={14} />
+              <span>Note</span>
+            </div>
+          </div>
+        ) : (
+          <img
+            src={getYouTubeThumbnail(video.videoId)}
+            alt={video.title}
+          />
+        )}
         <button
           className="play-overlay"
           onClick={() => onPlay(video)}
         >
-          <Play size={48} />
+          {video.isNoteOnly ? <FileText size={48} /> : <Play size={48} />}
         </button>
       </div>
       <div className="video-card-content">
@@ -68,14 +94,16 @@ const VideoCard = ({ video, onPlay }: VideoCardProps) => {
         </div>
         {video.notes && (
           <div className="video-notes">
-            {video.notes}
+            {video.notes.length > 100 ? `${video.notes.substring(0, 100)}...` : video.notes}
           </div>
         )}
         <div className="video-card-footer">
-          <span className="time-badge">
-            <Clock size={14} />
-            {formatTime(watchTime[video.id] || 0)}
-          </span>
+          {!video.isNoteOnly && (
+            <span className="time-badge">
+              <Clock size={14} />
+              {formatTime(watchTime[video.id] || 0)}
+            </span>
+          )}
           <div className="video-actions">
             <button
               className="btn-icon"

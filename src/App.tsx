@@ -8,6 +8,7 @@ import AddVideoModal from './components/AddVideoModal';
 import Home from './pages/Home';
 import CategoryPage from './pages/CategoryPage';
 import VideoPlayer from './pages/VideoPlayer';
+import NoteView from './pages/NoteView';
 import './styles/App.css';
 
 const AppLayout = () => {
@@ -60,6 +61,7 @@ const AppLayout = () => {
             <Route path="/" element={<Home />} />
             <Route path="/category/:categoryId" element={<CategoryPage />} />
             <Route path="/video/:videoId" element={<VideoPlayer />} />
+            <Route path="/note/:videoId" element={<NoteView />} />
           </Routes>
         </main>
       </div>

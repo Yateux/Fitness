@@ -17,6 +17,7 @@ const EditVideoModal = ({ video, onClose }: EditVideoModalProps) => {
   const [title, setTitle] = useState<string>(video?.title || '');
   const [url, setUrl] = useState<string>(video?.url || '');
   const [notes, setNotes] = useState<string>(video?.notes || '');
+  const [imageUrl, setImageUrl] = useState<string>(video?.imageUrl || '');
   const [error, setError] = useState<string>('');
   const [currentVideoId, setCurrentVideoId] = useState<string>(video?.videoId || '');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -24,9 +25,10 @@ const EditVideoModal = ({ video, onClose }: EditVideoModalProps) => {
   useEffect(() => {
     if (video) {
       setTitle(video.title);
-      setUrl(video.url);
+      setUrl(video.url || '');
       setNotes(video.notes || '');
-      setCurrentVideoId(video.videoId);
+      setImageUrl(video.imageUrl || '');
+      setCurrentVideoId(video.videoId || '');
     }
   }, [video]);
 
@@ -44,33 +46,58 @@ const EditVideoModal = ({ video, onClose }: EditVideoModalProps) => {
       return;
     }
 
-    if (!url.trim()) {
-      setError('YouTube URL is required');
-      return;
-    }
-
-    const videoId = extractYouTubeId(url);
-    if (!videoId) {
-      setError('Invalid YouTube URL. Use a URL like: https://www.youtube.com/watch?v=...');
-      return;
-    }
-
     if (!video) return;
 
-    setIsSubmitting(true);
-    try {
-      await updateVideo(video.id, {
-        title: title.trim(),
-        url: url.trim(),
-        videoId,
-        notes: notes.trim()
-      });
-      onClose();
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
-      setError(errorMessage);
-    } finally {
-      setIsSubmitting(false);
+    // For note-only entries, URL is not required
+    if (!video.isNoteOnly) {
+      if (!url.trim()) {
+        setError('YouTube URL is required');
+        return;
+      }
+
+      const videoId = extractYouTubeId(url);
+      if (!videoId) {
+        setError('Invalid YouTube URL. Use a URL like: https://www.youtube.com/watch?v=...');
+        return;
+      }
+
+      setIsSubmitting(true);
+      try {
+        await updateVideo(video.id, {
+          title: title.trim(),
+          url: url.trim(),
+          videoId,
+          notes: notes.trim(),
+          imageUrl: imageUrl.trim()
+        });
+        onClose();
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+        setError(errorMessage);
+      } finally {
+        setIsSubmitting(false);
+      }
+    } else {
+      // For notes, only title and notes are required
+      if (!notes.trim()) {
+        setError('Notes are required for note entries');
+        return;
+      }
+
+      setIsSubmitting(true);
+      try {
+        await updateVideo(video.id, {
+          title: title.trim(),
+          notes: notes.trim(),
+          imageUrl: imageUrl.trim()
+        });
+        onClose();
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+        setError(errorMessage);
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -80,52 +107,77 @@ const EditVideoModal = ({ video, onClose }: EditVideoModalProps) => {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Edit Video</h2>
+          <h2>{video.isNoteOnly ? 'Edit Note' : 'Edit Video'}</h2>
           <button className="btn-icon" onClick={onClose}>
             <X size={24} />
           </button>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <YouTubePreview videoId={currentVideoId} title={title} />
+          {!video.isNoteOnly && (
+            <YouTubePreview videoId={currentVideoId} title={title} />
+          )}
 
           <div className="form-group">
-            <label htmlFor="video-title">Video title</label>
+            <label htmlFor="video-title">{video.isNoteOnly ? 'Note title' : 'Video title'}</label>
             <input
               id="video-title"
               type="text"
               value={title}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
-              placeholder="Ex: Arm Workout"
+              placeholder={video.isNoteOnly ? 'Ex: Leg Day Session' : 'Ex: Arm Workout'}
               autoFocus
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="video-url">YouTube URL</label>
-            <input
-              id="video-url"
-              type="url"
-              value={url}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setUrl(e.target.value)}
-              placeholder="https://www.youtube.com/watch?v=..."
-            />
-            <small className="form-hint">
-              Paste the full YouTube video URL
-            </small>
-          </div>
+          {!video.isNoteOnly && (
+            <div className="form-group">
+              <label htmlFor="video-url">YouTube URL</label>
+              <input
+                id="video-url"
+                type="url"
+                value={url}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setUrl(e.target.value)}
+                placeholder="https://www.youtube.com/watch?v=..."
+              />
+              <small className="form-hint">
+                Paste the full YouTube video URL
+              </small>
+            </div>
+          )}
 
           <div className="form-group">
-            <label htmlFor="video-notes">Notes (Optional)</label>
+            <label htmlFor="video-notes">{video.isNoteOnly ? 'Notes' : 'Notes (Optional)'}</label>
             <textarea
               id="video-notes"
               value={notes}
               onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setNotes(e.target.value)}
-              placeholder="Ex: 3 sets x 12 reps, 20kg dumbbell..."
-              rows={4}
+              placeholder={video.isNoteOnly
+                ? 'Ex: Squats 3x12 @ 60kg, Leg press 4x10 @ 100kg, felt strong today...'
+                : 'Ex: 3 sets x 12 reps, 20kg dumbbell...'
+              }
+              rows={video.isNoteOnly ? 6 : 4}
+              required={video.isNoteOnly}
             />
             <small className="form-hint">
-              Track sets, reps, weights, or any other notes
+              {video.isNoteOnly
+                ? 'Track your session details, sets, reps, weights, and observations'
+                : 'Track sets, reps, weights, or any other notes'
+              }
+            </small>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="image-url">Image URL (Optional)</label>
+            <input
+              id="image-url"
+              type="url"
+              value={imageUrl}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setImageUrl(e.target.value)}
+              placeholder="https://example.com/image.jpg"
+            />
+            <small className="form-hint">
+              Add an image to visualize your {video.isNoteOnly ? 'session' : 'workout'}
             </small>
           </div>
 

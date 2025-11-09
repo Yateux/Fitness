@@ -104,7 +104,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
         await saveCategories(updatedCategories);
     };
 
-    const addVideo = async (title: string, url: string, categoryId: string, notes?: string): Promise<Video> => {
+    const addVideo = async (title: string, url: string, categoryId: string, notes?: string, imageUrl?: string): Promise<Video> => {
         const videoId = extractYouTubeId(url);
         if (!videoId) {
             throw new Error("Invalid YouTube URL");
@@ -119,12 +119,32 @@ export const AppProvider = ({ children }: AppProviderProps) => {
             categoryId,
             order: categoryVideos.length,
             createdAt: new Date().toISOString(),
-            ...(notes && { notes: notes.trim() })
+            isNoteOnly: false,
+            ...(notes && { notes: notes.trim() }),
+            ...(imageUrl && { imageUrl: imageUrl.trim() })
         };
         const updatedVideos = [...videos, newVideo];
         setVideos(updatedVideos);
         await saveVideos(updatedVideos);
         return newVideo;
+    };
+
+    const addNote = async (title: string, categoryId: string, notes: string, imageUrl?: string): Promise<Video> => {
+        const categoryVideos = videos.filter((v) => v.categoryId === categoryId);
+        const newNote: Video = {
+            id: Date.now().toString(),
+            title: title.trim(),
+            categoryId,
+            order: categoryVideos.length,
+            createdAt: new Date().toISOString(),
+            notes: notes.trim(),
+            isNoteOnly: true,
+            ...(imageUrl && { imageUrl: imageUrl.trim() })
+        };
+        const updatedVideos = [...videos, newNote];
+        setVideos(updatedVideos);
+        await saveVideos(updatedVideos);
+        return newNote;
     };
 
     const reorderVideos = async (categoryId: string, newOrder: Video[]): Promise<void> => {
@@ -201,6 +221,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
 
         // Video actions
         addVideo,
+        addNote,
         deleteVideo,
         updateVideo,
         reorderVideos,

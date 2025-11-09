@@ -8,12 +8,14 @@ export interface Category {
 export interface Video {
   id: string;
   title: string;
-  url: string;
-  videoId: string;
+  url?: string; // Optional for notes-only entries
+  videoId?: string; // Optional for notes-only entries
   categoryId: string;
   order: number;
   createdAt: string;
   notes?: string;
+  imageUrl?: string; // Optional image link for notes
+  isNoteOnly?: boolean; // Flag to distinguish notes from videos
 }
 
 export interface WatchTime {
@@ -34,7 +36,8 @@ export interface AppContextType {
   reorderCategories: (newOrder: Category[]) => Promise<void>;
 
   // Video actions
-  addVideo: (title: string, url: string, categoryId: string, notes?: string) => Promise<Video>;
+  addVideo: (title: string, url: string, categoryId: string, notes?: string, imageUrl?: string) => Promise<Video>;
+  addNote: (title: string, categoryId: string, notes: string, imageUrl?: string) => Promise<Video>;
   deleteVideo: (videoId: string) => Promise<void>;
   updateVideo: (videoId: string, updates: Partial<Video>) => Promise<void>;
   reorderVideos: (categoryId: string, newOrder: Video[]) => Promise<void>;
