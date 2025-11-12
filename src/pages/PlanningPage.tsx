@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Calendar, Plus, Clock, CheckCircle, Circle, Trash2, Edit2 } from 'lucide-react';
+import { Calendar, Plus, Clock, CheckCircle, Circle, Trash2, Edit2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { WorkoutSession } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -93,14 +93,16 @@ const PlanningPage = () => {
 
       <div className="planning-controls">
         <div className="week-navigation">
-          <button className="btn btn-secondary" onClick={prevPeriod}>
-            &larr; {viewMode === 'day' ? 'Previous day' : 'Previous week'}
+          <button className="btn btn-secondary nav-arrow" onClick={prevPeriod}>
+            <ChevronLeft size={20} />
+            <span className="nav-text">{viewMode === 'day' ? 'Previous day' : 'Previous week'}</span>
           </button>
           <button className="btn btn-secondary" onClick={goToToday}>
             Today
           </button>
-          <button className="btn btn-secondary" onClick={nextPeriod}>
-            {viewMode === 'day' ? 'Next day' : 'Next week'} &rarr;
+          <button className="btn btn-secondary nav-arrow" onClick={nextPeriod}>
+            <span className="nav-text">{viewMode === 'day' ? 'Next day' : 'Next week'}</span>
+            <ChevronRight size={20} />
           </button>
         </div>
 

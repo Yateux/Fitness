@@ -1,6 +1,6 @@
 import { useState, MouseEvent, useEffect } from 'react';
-import { Folder, Clock, Trash2, Edit2, GripVertical, X, Calendar, Home } from 'lucide-react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Folder, Clock, Trash2, Edit2, GripVertical, X, Calendar, Home, TrendingUp } from 'lucide-react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import {
   DndContext,
   closestCenter,
@@ -193,20 +193,30 @@ const Sidebar = ({ selectedCategoryId, onSelectCategory, isOpen = true, onClose 
         </div>
 
         <div className="sidebar-nav">
-          <button
+          <Link
+            to="/"
             className={`nav-item ${location.pathname === '/' ? 'active' : ''}`}
-            onClick={() => handleNavClick('/')}
+            onClick={onClose}
           >
             <Home size={20} />
             <span>Home</span>
-          </button>
-          <button
+          </Link>
+          <Link
+            to="/planning"
             className={`nav-item ${location.pathname === '/planning' ? 'active' : ''}`}
-            onClick={() => handleNavClick('/planning')}
+            onClick={onClose}
           >
             <Calendar size={20} />
             <span>Schedule</span>
-          </button>
+          </Link>
+          <Link
+            to="/stats"
+            className={`nav-item ${location.pathname === '/stats' ? 'active' : ''}`}
+            onClick={onClose}
+          >
+            <TrendingUp size={20} />
+            <span>Stats</span>
+          </Link>
         </div>
 
         <div className="sidebar-divider"></div>

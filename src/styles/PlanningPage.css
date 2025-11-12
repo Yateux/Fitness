@@ -326,6 +326,26 @@
     align-items: flex-start;
   }
 
+  .planning-header .btn-primary {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 100;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    padding: 0;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .planning-header .btn-primary span {
+    display: none;
+  }
+
+  .planning-header .btn-primary svg {
+    margin: 0;
+  }
+
   .planning-title h2 {
     font-size: 1.5rem;
   }
@@ -337,11 +357,35 @@
 
   .week-navigation {
     width: 100%;
-    flex-direction: column;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
   }
 
   .week-navigation button {
-    width: 100%;
+    padding: 0.5rem;
+    min-width: auto;
+    flex: 0 0 auto;
+  }
+
+  .week-navigation button:nth-child(1),
+  .week-navigation button:nth-child(3) {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .week-navigation button:nth-child(2) {
+    flex: 1;
+    max-width: 200px;
+  }
+
+  .nav-arrow .nav-text {
+    display: none;
+  }
+
+  .nav-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .view-mode-toggle {

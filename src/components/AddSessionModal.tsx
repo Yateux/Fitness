@@ -67,31 +67,33 @@ const AddSessionModal = ({ isOpen, onClose, preselectedDate = '' }: AddSessionMo
     <Modal isOpen={isOpen} onClose={onClose} title="Schedule a Session">
       <button
         type="button"
-        className="btn btn-secondary"
+        className="btn btn-secondary quick-start-btn"
         onClick={setCurrentDateTime}
         style={{ width: '100%', marginBottom: '1rem' }}
       >
         Starting now!
       </button>
 
-      <div className="form-group">
-        <label htmlFor="session-date">Date</label>
-        <input
-          id="session-date"
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-        />
-      </div>
+      <div className="form-row">
+        <div className="form-group">
+          <label htmlFor="session-date">Date</label>
+          <input
+            id="session-date"
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+          />
+        </div>
 
-      <div className="form-group">
-        <label htmlFor="session-time">Time</label>
-        <input
-          id="session-time"
-          type="time"
-          value={time}
-          onChange={(e) => setTime(e.target.value)}
-        />
+        <div className="form-group">
+          <label htmlFor="session-time">Time</label>
+          <input
+            id="session-time"
+            type="time"
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
+          />
+        </div>
       </div>
 
       <div className="form-group">

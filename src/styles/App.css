@@ -203,6 +203,43 @@ body {
   }
 }
 
+.notification-prompt {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.95) 0%, rgba(79, 70, 229, 0.95) 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
+  max-width: 300px;
+  z-index: 1000;
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+  animation: slideIn 0.3s ease-out;
+}
+
+.notification-prompt p {
+  margin: 0 0 0.75rem 0;
+  color: white;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.notification-prompt .btn {
+  width: 100%;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 768px) {
   .container {
     flex-direction: column;

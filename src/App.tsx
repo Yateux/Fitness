@@ -10,6 +10,7 @@ import CategoryPage from './pages/CategoryPage';
 import VideoPlayer from './pages/VideoPlayer';
 import NoteView from './pages/NoteView';
 import PlanningPage from './pages/PlanningPage';
+import StatsPage from './pages/StatsPage';
 import './styles/App.css';
 
 const AppLayout = () => {
@@ -61,6 +62,7 @@ const AppLayout = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/planning" element={<PlanningPage />} />
+            <Route path="/stats" element={<StatsPage />} />
             <Route path="/category/:categoryId" element={<CategoryPage />} />
             <Route path="/video/:videoId" element={<VideoPlayer />} />
             <Route path="/note/:videoId" element={<NoteView />} />
