@@ -2,90 +2,91 @@
     const container = document.getElementById("contentDoc");
     if (!container) return;
 
-    // 1) Initialiser Mermaid (sans startOnLoad)
-    mermaid.initialize({
-      startOnLoad: false,
-      theme: "forest",
-      securityLevel: "loose",
+    // Fonction qui ajoute zoom+pan à un svg donné
+    const attachZoomPan = (svgEl) => {
+      // éviter de l'attacher plusieurs fois
+      if (svgEl.dataset.zoomPanAttached === "true") return;
+      svgEl.dataset.zoomPanAttached = "true";
+
+      // S'assurer d'avoir un viewBox
+      if (!svgEl.getAttribute("viewBox")) {
+        const bbox = svgEl.getBBox();
+        svgEl.setAttribute(
+          "viewBox",
+          `${bbox.x} ${bbox.y} ${bbox.width} ${bbox.height}`
+        );
+      }
+
+      const vb = svgEl.viewBox.baseVal;
+      let isPanning = false;
+      let start = { x: 0, y: 0 };
+
+      const handleWheel = (e) => {
+        e.preventDefault();
+        const zoomFactor = e.deltaY > 0 ? 1.1 : 0.9;
+
+        const rect = svgEl.getBoundingClientRect();
+        const mouseX = (e.clientX - rect.left) / rect.width;
+        const mouseY = (e.clientY - rect.top) / rect.height;
+
+        vb.x += vb.width * (mouseX - mouseX * zoomFactor);
+        vb.y += vb.height * (mouseY - mouseY * zoomFactor);
+        vb.width *= zoomFactor;
+        vb.height *= zoomFactor;
+
+        svgEl.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.width} ${vb.height}`);
+      };
+
+      const handleMouseDown = (e) => {
+        isPanning = true;
+        start = { x: e.clientX, y: e.clientY };
+        svgEl.style.cursor = "grabbing";
+      };
+
+      const handleMouseMove = (e) => {
+        if (!isPanning) return;
+        const dx = (e.clientX - start.x) * (vb.width / svgEl.clientWidth);
+        const dy = (e.clientY - start.y) * (vb.height / svgEl.clientHeight);
+
+        vb.x -= dx;
+        vb.y -= dy;
+        svgEl.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.width} ${vb.height}`);
+        start = { x: e.clientX, y: e.clientY };
+      };
+
+      const handleMouseUp = () => {
+        isPanning = false;
+        svgEl.style.cursor = "grab";
+      };
+
+      svgEl.style.cursor = "grab";
+      svgEl.addEventListener("wheel", handleWheel, { passive: false });
+      svgEl.addEventListener("mousedown", handleMouseDown);
+      svgEl.addEventListener("mousemove", handleMouseMove);
+      svgEl.addEventListener("mouseup", handleMouseUp);
+      svgEl.addEventListener("mouseleave", handleMouseUp);
+    };
+
+    // 1) Attacher au(x) svg déjà présents (si Mermaid a déjà rendu)
+    container.querySelectorAll("svg").forEach(attachZoomPan);
+
+    // 2) Observer si Mermaid rend des svg après coup (cas asynchrone)
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((m) => {
+        m.addedNodes.forEach((node) => {
+          if (node.nodeType !== 1) return; // pas un élément
+          if (node.tagName === "svg" || node.tagName === "SVG") {
+            attachZoomPan(node);
+          } else if (node.querySelectorAll) {
+            node.querySelectorAll("svg").forEach(attachZoomPan);
+          }
+        });
+      });
     });
 
-    // 2) Transformer les blocs .mermaid en <svg>
-    const mermaidBlocks = container.querySelectorAll(".mermaid");
-    if (mermaidBlocks.length) {
-      mermaid.init(undefined, mermaidBlocks);
-    }
+    observer.observe(container, { childList: true, subtree: true });
 
-    // 3) Récupérer le SVG (prends le premier pour l’exemple)
-    const svgEl = container.querySelector("svg");
-    if (!svgEl) return;
-
-    // 3a) S'assurer d'avoir un viewBox correct
-    if (!svgEl.getAttribute("viewBox")) {
-      const bbox = svgEl.getBBox();
-      svgEl.setAttribute(
-        "viewBox",
-        `${bbox.x} ${bbox.y} ${bbox.width} ${bbox.height}`
-      );
-    }
-
-    const vb = svgEl.viewBox.baseVal;
-    let isPanning = false;
-    let start = { x: 0, y: 0 };
-
-    // --- handlers ---
-    const handleWheel = (e) => {
-      e.preventDefault();
-      const zoomFactor = e.deltaY > 0 ? 1.1 : 0.9;
-
-      // Zoom centré sous la souris
-      const rect = svgEl.getBoundingClientRect();
-      const mouseX = (e.clientX - rect.left) / rect.width;
-      const mouseY = (e.clientY - rect.top) / rect.height;
-
-      vb.x += vb.width * (mouseX - mouseX * zoomFactor);
-      vb.y += vb.height * (mouseY - mouseY * zoomFactor);
-      vb.width *= zoomFactor;
-      vb.height *= zoomFactor;
-
-      svgEl.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.width} ${vb.height}`);
-    };
-
-    const handleMouseDown = (e) => {
-      isPanning = true;
-      start = { x: e.clientX, y: e.clientY };
-      svgEl.style.cursor = "grabbing";
-    };
-
-    const handleMouseMove = (e) => {
-      if (!isPanning) return;
-      const dx = (e.clientX - start.x) * (vb.width / svgEl.clientWidth);
-      const dy = (e.clientY - start.y) * (vb.height / svgEl.clientHeight);
-
-      vb.x -= dx;
-      vb.y -= dy;
-      svgEl.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.width} ${vb.height}`);
-      start = { x: e.clientX, y: e.clientY };
-    };
-
-    const handleMouseUp = () => {
-      isPanning = false;
-      svgEl.style.cursor = "grab";
-    };
-
-    // --- attach ---
-    svgEl.style.cursor = "grab";
-    svgEl.addEventListener("wheel", handleWheel, { passive: false });
-    svgEl.addEventListener("mousedown", handleMouseDown);
-    svgEl.addEventListener("mousemove", handleMouseMove);
-    svgEl.addEventListener("mouseup", handleMouseUp);
-    svgEl.addEventListener("mouseleave", handleMouseUp);
-
-    // 4) cleanup quand data.text change ou le composant se démonte
     return () => {
-      svgEl.removeEventListener("wheel", handleWheel);
-      svgEl.removeEventListener("mousedown", handleMouseDown);
-      svgEl.removeEventListener("mousemove", handleMouseMove);
-      svgEl.removeEventListener("mouseup", handleMouseUp);
-      svgEl.removeEventListener("mouseleave", handleMouseUp);
+      observer.disconnect();
     };
-  }, [data.text]);
+  }, [data.text]); // se relance quand ta doc change
