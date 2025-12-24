@@ -1,52 +1,76 @@
-interface Props {
-  used: number
-  total: number
-}
+import React from 'react';
+import styled from 'styled-components';
 
-export const UsageArc = ({ used, total }: Props) => {
-  const percent = Math.min(used / total, 1)
+// --- Composants Stylisés ---
 
-  const r = 70
-  const stroke = 14
-  const C = 2 * Math.PI * r
+const Wrapper = styled.div`
+  display: inline-flex;
+  align-items: center;
+  /* L'espace entre l'icône et le texte reste proportionnel à la taille */
+  gap: ${props => props.$size / 4}px;
+  font-family: sans-serif;
+`;
 
-  const GAP_GLOBAL = C * 0.12        // trou principal
-  const GAP_SEGMENT = C * 0.025      // micro rupture entre couleurs
+const ChartSvg = styled.svg`
+  transform: rotate(-90deg);
+  display: block;
+  flex-shrink: 0;
+`;
 
-  const usable = C - GAP_GLOBAL - GAP_SEGMENT
+const ChartCircle = styled.circle`
+  fill: none;
+  stroke-width: ${props => props.$strokeWidth}px;
+  stroke-linecap: round;
+  transition: all 0.3s ease;
+  
+  /* On passe les calculs dynamiques via les props */
+  stroke: ${props => props.$color};
+  stroke-dasharray: ${props => props.$dashArray};
+  stroke-dashoffset: ${props => props.$dashOffset};
+`;
 
-  const orangeLength = usable * percent
-  const blueLength = usable - orangeLength
+// --- Composant Principal ---
+
+const DynamicUsageChart = ({ size = 30, strokeWidth = 4, percentage = 25 }) => {
+  // Logique de calcul identique
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const autoGap = circumference * 0.05;
+  
+  const orangeSegment = (percentage / 100) * circumference - autoGap;
+  const blueSegment = ((100 - percentage) / 100) * circumference - autoGap;
 
   return (
-    <svg width="180" height="180" viewBox="0 0 180 180">
-      <g transform="rotate(-90 90 90)">
-        {/* Bleu */}
-        <circle
-          cx="90"
-          cy="90"
-          r={r}
-          fill="none"
-          stroke="#5b73a6"
-          strokeWidth={stroke}
-          strokeLinecap="round"
-          strokeDasharray={`${blueLength} ${C}`}
-          strokeDashoffset={0}
+    <Wrapper $size={size}>
+      <ChartSvg
+        width={size}
+        height={size}
+        viewBox={`0 0 ${size} ${size}`}
+      >
+        {/* Segment Bleu */}
+        <ChartCircle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          $strokeWidth={strokeWidth}
+          $color="#6d8bc4"
+          $dashArray={`${blueSegment} ${circumference - blueSegment}`}
+          $dashOffset={-( (percentage / 100) * circumference + autoGap / 2 )}
         />
 
-        {/* Orange */}
-        <circle
-          cx="90"
-          cy="90"
-          r={r}
-          fill="none"
-          stroke="#e67e22"
-          strokeWidth={stroke}
-          strokeLinecap="round"
-          strokeDasharray={`${orangeLength} ${C}`}
-          strokeDashoffset={-(blueLength + GAP_SEGMENT)}
+        {/* Segment Orange */}
+        <ChartCircle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          $strokeWidth={strokeWidth}
+          $color="#f08036"
+          $dashArray={`${orangeSegment} ${circumference - orangeSegment}`}
+          $dashOffset={-autoGap / 2}
         />
-      </g>
-    </svg>
-  )
-}
+      </ChartSvg>
+    </Wrapper>
+  );
+};
+
+export default DynamicUsageChart;
