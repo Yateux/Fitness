@@ -1,12 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
 
-// --- Types & Interfaces ---
+// --- Interfaces ---
 
 interface UsageChartProps {
   size?: number;
   strokeWidth?: number;
-  percentage?: number;
+  value?: number;    // La valeur actuelle (ex: 20)
+  max?: number;      // La valeur maximum (ex: 300)
 }
 
 interface StyledProps {
@@ -36,7 +37,7 @@ const ChartCircle = styled.circle<StyledProps>`
   fill: none;
   stroke-width: ${props => props.$strokeWidth}px;
   stroke-linecap: round;
-  transition: all 0.3s ease-in-out;
+  transition: all 0.4s ease-out;
   stroke: ${props => props.$color};
   stroke-dasharray: ${props => props.$dashArray};
   stroke-dashoffset: ${props => props.$dashOffset};
@@ -47,45 +48,56 @@ const ChartCircle = styled.circle<StyledProps>`
 const DynamicUsageChart: React.FC<UsageChartProps> = ({ 
   size = 30, 
   strokeWidth = 4, 
-  percentage = 25 
+  value = 20,
+  max = 100 
 }) => {
-  // Calculs de géométrie SVG
-  const radius: number = (size - strokeWidth) / 2;
-  const circumference: number = 2 * Math.PI * radius;
-  const autoGap: number = circumference * 0.05;
+  // Calcul du ratio réel par rapport au max
+  const ratio = value / max;
   
-  const orangeSegment: number = (percentage / 100) * circumference - autoGap;
-  const blueSegment: number = ((100 - percentage) / 100) * circumference - autoGap;
+  // Géométrie
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  
+  // Le gap s'adapte à la circonférence
+  const autoGap = circumference * 0.05;
+  
+  // Calcul des segments
+  // Orange = la valeur actuelle
+  const orangeDash = (ratio * circumference) - autoGap;
+  // Bleu = le reste jusqu'au max
+  const blueDash = ((1 - ratio) * circumference) - autoGap;
+
+  // Sécurité pour éviter les valeurs négatives si le gap est trop grand
+  const finalOrange = Math.max(0, orangeDash);
+  const finalBlue = Math.max(0, blueDash);
 
   return (
     <Wrapper $size={size}>
-      <ChartSvg
-        width={size}
-        height={size}
-        viewBox={`0 0 ${size} ${size}`}
-      >
-        {/* Segment Bleu */}
+      <ChartSvg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        
+        {/* Segment Bleu (Le reste) */}
         <ChartCircle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           $strokeWidth={strokeWidth}
           $color="#6d8bc4"
-          $dashArray={`${blueSegment} ${circumference - blueSegment}`}
-          $dashOffset={-( (percentage / 100) * circumference + autoGap / 2 )}
+          $dashArray={`${finalBlue} ${circumference - finalBlue}`}
+          // On le décale pour qu'il commence après le segment orange
+          $dashOffset={-(ratio * circumference + autoGap / 2)}
         />
 
-        {/* Segment Orange */}
+        {/* Segment Orange (La progression / Valeur) */}
         <ChartCircle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           $strokeWidth={strokeWidth}
           $color="#f08036"
-          $dashArray={`${orangeSegment} ${circumference - orangeSegment}`}
+          $dashArray={`${finalOrange} ${circumference - finalOrange}`}
           $dashOffset={-autoGap / 2}
         />
-      </ChartSvg>
+      </svg>
     </Wrapper>
   );
 };
