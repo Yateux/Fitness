@@ -1,13 +1,28 @@
 import React from 'react';
 import styled from 'styled-components';
 
+// --- Types & Interfaces ---
+
+interface UsageChartProps {
+  size?: number;
+  strokeWidth?: number;
+  percentage?: number;
+}
+
+interface StyledProps {
+  $size?: number;
+  $strokeWidth?: number;
+  $color?: string;
+  $dashArray?: string;
+  $dashOffset?: number;
+}
+
 // --- Composants Stylisés ---
 
-const Wrapper = styled.div`
+const Wrapper = styled.div<StyledProps>`
   display: inline-flex;
   align-items: center;
-  /* L'espace entre l'icône et le texte reste proportionnel à la taille */
-  gap: ${props => props.$size / 4}px;
+  gap: ${props => (props.$size ? props.$size / 4 : 8)}px;
   font-family: sans-serif;
 `;
 
@@ -17,13 +32,11 @@ const ChartSvg = styled.svg`
   flex-shrink: 0;
 `;
 
-const ChartCircle = styled.circle`
+const ChartCircle = styled.circle<StyledProps>`
   fill: none;
   stroke-width: ${props => props.$strokeWidth}px;
   stroke-linecap: round;
-  transition: all 0.3s ease;
-  
-  /* On passe les calculs dynamiques via les props */
+  transition: all 0.3s ease-in-out;
   stroke: ${props => props.$color};
   stroke-dasharray: ${props => props.$dashArray};
   stroke-dashoffset: ${props => props.$dashOffset};
@@ -31,14 +44,18 @@ const ChartCircle = styled.circle`
 
 // --- Composant Principal ---
 
-const DynamicUsageChart = ({ size = 30, strokeWidth = 4, percentage = 25 }) => {
-  // Logique de calcul identique
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const autoGap = circumference * 0.05;
+const DynamicUsageChart: React.FC<UsageChartProps> = ({ 
+  size = 30, 
+  strokeWidth = 4, 
+  percentage = 25 
+}) => {
+  // Calculs de géométrie SVG
+  const radius: number = (size - strokeWidth) / 2;
+  const circumference: number = 2 * Math.PI * radius;
+  const autoGap: number = circumference * 0.05;
   
-  const orangeSegment = (percentage / 100) * circumference - autoGap;
-  const blueSegment = ((100 - percentage) / 100) * circumference - autoGap;
+  const orangeSegment: number = (percentage / 100) * circumference - autoGap;
+  const blueSegment: number = ((100 - percentage) / 100) * circumference - autoGap;
 
   return (
     <Wrapper $size={size}>
