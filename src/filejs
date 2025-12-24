@@ -1,57 +1,52 @@
-import styled from "styled-components";
-
 interface Props {
-  used: number;
-  total: number;
+  used: number
+  total: number
 }
 
 export const UsageArc = ({ used, total }: Props) => {
-  const percent = Math.min(used / total, 1);
-  const radius = 70;
-  const stroke = 12;
-  const circumference = 2 * Math.PI * radius;
+  const percent = Math.min(used / total, 1)
 
-  // On garde un gap fixe (ex: 15%)
-  const GAP_PERCENT = 0.15;
-  const visibleLength = circumference * (1 - GAP_PERCENT);
+  const r = 70
+  const stroke = 14
+  const C = 2 * Math.PI * r
 
-  const usedLength = visibleLength * percent;
-  const remainingLength = visibleLength - usedLength;
+  const GAP_GLOBAL = C * 0.12        // trou principal
+  const GAP_SEGMENT = C * 0.025      // micro rupture entre couleurs
+
+  const usable = C - GAP_GLOBAL - GAP_SEGMENT
+
+  const orangeLength = usable * percent
+  const blueLength = usable - orangeLength
 
   return (
-    <Wrapper>
-      <svg width="180" height="180" viewBox="0 0 180 180">
-        <g transform="rotate(-90 90 90)">
-          {/* Base (bleu) */}
-          <circle
-            cx="90"
-            cy="90"
-            r={radius}
-            fill="none"
-            stroke="#5b73a6"
-            strokeWidth={stroke}
-            strokeLinecap="round"
-            strokeDasharray={`${visibleLength} ${circumference}`}
-          />
+    <svg width="180" height="180" viewBox="0 0 180 180">
+      <g transform="rotate(-90 90 90)">
+        {/* Bleu */}
+        <circle
+          cx="90"
+          cy="90"
+          r={r}
+          fill="none"
+          stroke="#5b73a6"
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          strokeDasharray={`${blueLength} ${C}`}
+          strokeDashoffset={0}
+        />
 
-          {/* Usage (orange) */}
-          <circle
-            cx="90"
-            cy="90"
-            r={radius}
-            fill="none"
-            stroke="#e67e22"
-            strokeWidth={stroke}
-            strokeLinecap="round"
-            strokeDasharray={`${usedLength} ${remainingLength}`}
-          />
-        </g>
-      </svg>
-    </Wrapper>
-  );
-};
-
-const Wrapper = styled.div`
-  width: 180px;
-  height: 180px;
-`;
+        {/* Orange */}
+        <circle
+          cx="90"
+          cy="90"
+          r={r}
+          fill="none"
+          stroke="#e67e22"
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          strokeDasharray={`${orangeLength} ${C}`}
+          strokeDashoffset={-(blueLength + GAP_SEGMENT)}
+        />
+      </g>
+    </svg>
+  )
+}
