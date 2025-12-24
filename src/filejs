@@ -1,92 +1,77 @@
-  useEffect(() => {
-    const container = document.getElementById("contentDoc");
-    if (!container) return;
+import styled from "styled-components";
 
-    // Fonction qui ajoute zoom+pan à un svg donné
-    const attachZoomPan = (svgEl) => {
-      // éviter de l'attacher plusieurs fois
-      if (svgEl.dataset.zoomPanAttached === "true") return;
-      svgEl.dataset.zoomPanAttached = "true";
+interface Props {
+  used: number;
+  total: number;
+}
 
-      // S'assurer d'avoir un viewBox
-      if (!svgEl.getAttribute("viewBox")) {
-        const bbox = svgEl.getBBox();
-        svgEl.setAttribute(
-          "viewBox",
-          `${bbox.x} ${bbox.y} ${bbox.width} ${bbox.height}`
-        );
-      }
+export const UsageRing = ({ used, total }: Props) => {
+  const percent = Math.min((used / total) * 100, 100);
+  const radius = 32;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (percent / 100) * circumference;
 
-      const vb = svgEl.viewBox.baseVal;
-      let isPanning = false;
-      let start = { x: 0, y: 0 };
+  return (
+    <Wrapper>
+      <svg width="80" height="80">
+        <circle
+          cx="40"
+          cy="40"
+          r={radius}
+          stroke="#eee"
+          strokeWidth="6"
+          fill="none"
+        />
+        <ProgressCircle
+          cx="40"
+          cy="40"
+          r={radius}
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          usage={percent}
+        />
+      </svg>
 
-      const handleWheel = (e) => {
-        e.preventDefault();
-        const zoomFactor = e.deltaY > 0 ? 1.1 : 0.9;
+      <Text>
+        <strong>Usage</strong>
+        <span>{used} / {total}GB</span>
+      </Text>
+    </Wrapper>
+  );
+};
 
-        const rect = svgEl.getBoundingClientRect();
-        const mouseX = (e.clientX - rect.left) / rect.width;
-        const mouseY = (e.clientY - rect.top) / rect.height;
 
-        vb.x += vb.width * (mouseX - mouseX * zoomFactor);
-        vb.y += vb.height * (mouseY - mouseY * zoomFactor);
-        vb.width *= zoomFactor;
-        vb.height *= zoomFactor;
+const Wrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+`;
 
-        svgEl.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.width} ${vb.height}`);
-      };
+const ProgressCircle = styled.circle<{ usage: number }>`
+  fill: none;
+  stroke-width: 6;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  transition: stroke-dashoffset 0.8s ease, stroke 0.4s ease;
 
-      const handleMouseDown = (e) => {
-        isPanning = true;
-        start = { x: e.clientX, y: e.clientY };
-        svgEl.style.cursor = "grabbing";
-      };
+  stroke: ${({ usage }) =>
+    usage < 40 ? "#4f6cff" : usage < 75 ? "#ff9f1c" : "#ff4d4f"};
+`;
 
-      const handleMouseMove = (e) => {
-        if (!isPanning) return;
-        const dx = (e.clientX - start.x) * (vb.width / svgEl.clientWidth);
-        const dy = (e.clientY - start.y) * (vb.height / svgEl.clientHeight);
+const Text = styled.div`
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
 
-        vb.x -= dx;
-        vb.y -= dy;
-        svgEl.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.width} ${vb.height}`);
-        start = { x: e.clientX, y: e.clientY };
-      };
+  strong {
+    font-weight: 600;
+  }
 
-      const handleMouseUp = () => {
-        isPanning = false;
-        svgEl.style.cursor = "grab";
-      };
+  span {
+    color: #666;
+  }
+`;
 
-      svgEl.style.cursor = "grab";
-      svgEl.addEventListener("wheel", handleWheel, { passive: false });
-      svgEl.addEventListener("mousedown", handleMouseDown);
-      svgEl.addEventListener("mousemove", handleMouseMove);
-      svgEl.addEventListener("mouseup", handleMouseUp);
-      svgEl.addEventListener("mouseleave", handleMouseUp);
-    };
-
-    // 1) Attacher au(x) svg déjà présents (si Mermaid a déjà rendu)
-    container.querySelectorAll("svg").forEach(attachZoomPan);
-
-    // 2) Observer si Mermaid rend des svg après coup (cas asynchrone)
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((m) => {
-        m.addedNodes.forEach((node) => {
-          if (node.nodeType !== 1) return; // pas un élément
-          if (node.tagName === "svg" || node.tagName === "SVG") {
-            attachZoomPan(node);
-          } else if (node.querySelectorAll) {
-            node.querySelectorAll("svg").forEach(attachZoomPan);
-          }
-        });
-      });
-    });
-
-    observer.observe(container, { childList: true, subtree: true });
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [data.text]); // se relance quand ta doc change
+<UsageRing used={21.3} total={100} />
+<UsageRing used={160.2} total={200} />
